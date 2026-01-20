@@ -1,0 +1,1901 @@
+<!-- Main Run Dashboard -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Main Run Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#00E0FF", // Electric Cyan
+                        secondary: "#3B82F6", // Blue
+                        "background-light": "#F0F4F8", // Light mode bg (fallback)
+                        "background-dark": "#0B1120", // Deep dark blue
+                        "surface-dark": "rgba(15, 23, 42, 0.8)",
+                        "surface-light": "rgba(255, 255, 255, 0.9)",
+                    },
+                    fontFamily: {
+                        display: ['"Exo 2"', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'gradient-primary': 'linear-gradient(135deg, #00E0FF 0%, #3B82F6 100%)',
+                        'gradient-dark-overlay': 'linear-gradient(to bottom, rgba(11, 17, 32, 0.6) 0%, rgba(11, 17, 32, 0.2) 50%, rgba(11, 17, 32, 0.9) 100%)',
+                    },
+                    boxShadow: {
+                        'glow': '0 0 20px rgba(0, 224, 255, 0.5)',
+                        'glow-sm': '0 0 10px rgba(0, 224, 255, 0.3)',
+                    }
+                },
+            },
+        };
+    </script>
+    <style>
+        .map-bg {
+            background-color: #0f172a;
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .road {
+            position: absolute;
+            background: rgba(0, 224, 255, 0.15);
+            box-shadow: 0 0 8px rgba(0, 224, 255, 0.2);
+            border-radius: 999px;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 224, 255, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 20px rgba(0, 224, 255, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 224, 255, 0);
+            }
+        }
+
+        .btn-pulse {
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .marker-float {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-display h-screen w-screen overflow-hidden text-slate-800 dark:text-white transition-colors duration-300 antialiased selection:bg-primary selection:text-white">
+    <div class="absolute inset-0 z-0 map-bg">
+        <div class="road w-[80%] h-1 top-1/4 left-0 rotate-12"></div>
+        <div class="road w-1 h-[60%] top-0 left-1/3 rotate-6"></div>
+        <div
+            class="road w-[120%] h-1.5 bottom-1/3 -left-10 -rotate-12 bg-primary/30 shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+        </div>
+        <div class="road w-1 h-[40%] bottom-0 right-1/4 rotate-3"></div>
+        <div class="road w-[50%] h-1 top-10 right-0 -rotate-45"></div>
+        <div class="absolute top-[20%] right-[20%] flex flex-col items-center marker-float">
+            <span
+                class="material-icons text-primary text-4xl drop-shadow-[0_0_10px_rgba(0,224,255,0.8)]">location_on</span>
+            <span class="text-xs font-bold text-white bg-black/50 px-2 py-0.5 rounded backdrop-blur-sm mt-1">Praça
+                Central</span>
+        </div>
+        <div class="absolute bottom-[35%] left-[15%] flex flex-col items-center marker-float"
+            style="animation-delay: 1.5s;">
+            <span
+                class="material-icons text-purple-400 text-3xl drop-shadow-[0_0_10px_rgba(192,132,252,0.8)]">emoji_events</span>
+        </div>
+        <div class="absolute inset-0 bg-gradient-dark-overlay pointer-events-none"></div>
+    </div>
+    <div class="relative z-10 flex flex-col h-full justify-between pb-6">
+        <div class="pt-14 px-6">
+            <div
+                class="bg-white/10 dark:bg-surface-dark backdrop-blur-md rounded-2xl p-1 border border-white/20 dark:border-white/10 flex items-center justify-between shadow-lg">
+                <div class="flex items-center gap-3 px-3 py-2">
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center shadow-lg border-2 border-white/20">
+                        <span class="material-symbols-rounded text-white text-xl">military_tech</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] uppercase tracking-wider text-gray-300 font-semibold">Liga Atual</span>
+                        <span class="text-sm font-bold text-white">League Elite</span>
+                    </div>
+                </div>
+                <div class="h-8 w-[1px] bg-white/10"></div>
+                <div class="flex items-center gap-3 px-4 py-2">
+                    <div class="flex flex-col items-end">
+                        <span class="text-[10px] uppercase tracking-wider text-gray-300 font-semibold">Troféus</span>
+                        <span class="text-lg font-bold text-primary tabular-nums">3,420</span>
+                    </div>
+                    <span
+                        class="material-symbols-rounded text-primary drop-shadow-[0_0_8px_rgba(0,224,255,0.8)]">emoji_events</span>
+                </div>
+            </div>
+        </div>
+        <div class="absolute top-40 right-4 flex flex-col gap-4">
+            <button
+                class="w-12 h-12 rounded-xl bg-surface-dark backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg active:scale-95 transition-transform group">
+                <span
+                    class="material-symbols-rounded text-white group-hover:text-primary transition-colors">leaderboard</span>
+            </button>
+            <button
+                class="w-12 h-12 rounded-xl bg-surface-dark backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg active:scale-95 transition-transform group">
+                <span
+                    class="material-symbols-rounded text-white group-hover:text-primary transition-colors">my_location</span>
+            </button>
+        </div>
+        <div class="w-full flex flex-col items-center justify-end flex-grow pb-24 relative">
+            <div class="absolute bottom-[8rem] z-0 pointer-events-none">
+                <div class="w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-pulse"></div>
+            </div>
+            <div class="relative group cursor-pointer z-10">
+                <div
+                    class="absolute -inset-4 bg-primary/20 rounded-full blur-xl group-hover:bg-primary/30 transition-all duration-500">
+                </div>
+                <button
+                    class="relative w-24 h-24 rounded-full bg-gradient-primary flex items-center justify-center shadow-glow btn-pulse border-4 border-white/10 active:scale-95 transition-transform duration-200">
+                    <span class="material-symbols-rounded text-white text-4xl drop-shadow-md">directions_run</span>
+                </button>
+                <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                    <span class="text-sm font-bold text-white tracking-widest uppercase drop-shadow-md">Iniciar</span>
+                </div>
+            </div>
+        </div>
+        <div class="absolute bottom-6 left-6 right-6 z-20">
+            <nav
+                class="bg-surface-dark backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl px-6 py-4 flex justify-between items-center">
+                <a class="flex flex-col items-center gap-1 group" href="#">
+                    <div class="p-1.5 rounded-xl bg-primary/20 text-primary transition-all">
+                        <span class="material-symbols-rounded text-2xl">home</span>
+                    </div>
+                    <div class="w-1 h-1 bg-primary rounded-full shadow-[0_0_5px_#00E0FF]"></div>
+                </a>
+                <a class="flex flex-col items-center gap-1 group opacity-60 hover:opacity-100 transition-opacity"
+                    href="#">
+                    <div class="p-1.5 rounded-xl group-hover:bg-white/5 text-white transition-all">
+                        <span class="material-symbols-rounded text-2xl">map</span>
+                    </div>
+                    <div class="w-1 h-1 bg-transparent rounded-full"></div>
+                </a>
+                <a class="flex flex-col items-center gap-1 group opacity-60 hover:opacity-100 transition-opacity"
+                    href="#">
+                    <div class="p-1.5 rounded-xl group-hover:bg-white/5 text-white transition-all">
+                        <span class="material-symbols-rounded text-2xl">emoji_events</span>
+                    </div>
+                    <div class="w-1 h-1 bg-transparent rounded-full"></div>
+                </a>
+                <a class="flex flex-col items-center gap-1 group opacity-60 hover:opacity-100 transition-opacity"
+                    href="#">
+                    <div class="p-1.5 rounded-xl group-hover:bg-white/5 text-white transition-all">
+                        <span class="material-symbols-rounded text-2xl">search</span>
+                    </div>
+                    <div class="w-1 h-1 bg-transparent rounded-full"></div>
+                </a>
+                <a class="flex flex-col items-center gap-1 group opacity-60 hover:opacity-100 transition-opacity"
+                    href="#">
+                    <div class="p-1.5 rounded-xl group-hover:bg-white/5 text-white transition-all">
+                        <span class="material-symbols-rounded text-2xl">person</span>
+                    </div>
+                    <div class="w-1 h-1 bg-transparent rounded-full"></div>
+                </a>
+            </nav>
+        </div>
+    </div>
+    <div
+        class="fixed inset-0 pointer-events-none opacity-[0.03] z-50 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
+    </div>
+
+</body>
+
+</html>
+
+<!-- Main Run Dashboard -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Elite Profile Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#00E0FF", // Electric Cyan
+                        secondary: "#3B82F6", // Blue
+                        "background-dark": "#0B1120", // Deep dark blue
+                        "surface-dark": "#1E293B", // Slate 800ish for cards
+                        "surface-card": "rgba(30, 41, 59, 0.7)",
+                    },
+                    fontFamily: {
+                        display: ['"Exo 2"', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'gradient-primary': 'linear-gradient(135deg, #00E0FF 0%, #3B82F6 100%)',
+                        'gradient-card': 'linear-gradient(135deg, rgba(11, 17, 32, 0.8) 0%, rgba(30, 58, 138, 0.4) 100%)',
+                        'gradient-stat': 'linear-gradient(160deg, #1e3a8a 0%, #00E0FF 100%)',
+                        'gradient-dark-overlay': 'linear-gradient(to bottom, rgba(11, 17, 32, 0.6) 0%, rgba(11, 17, 32, 0.2) 50%, rgba(11, 17, 32, 0.9) 100%)',
+                    },
+                    boxShadow: {
+                        'glow': '0 0 15px rgba(0, 224, 255, 0.3)',
+                        'glow-text': '0 0 10px rgba(0, 224, 255, 0.6)',
+                        'inner-glow': 'inset 0 0 20px rgba(0, 224, 255, 0.1)',
+                    }
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            background-color: #0B1120;
+            background-image:
+                radial-gradient(circle at 50% 0%, rgba(0, 224, 255, 0.08) 0%, transparent 40%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-stat-card {
+            background: linear-gradient(145deg, rgba(30, 58, 138, 0.4), rgba(0, 224, 255, 0.1));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 224, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .metallic-icon-bg {
+            background: linear-gradient(135deg, #475569 0%, #1e293b 50%, #0f172a 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .bronze-gradient {
+            background: linear-gradient(135deg, #d97706 0%, #92400e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-dark font-display h-screen w-screen overflow-hidden text-white antialiased selection:bg-primary selection:text-white flex flex-col">
+    <header class="pt-12 px-6 flex justify-between items-center z-20">
+        <h1 class="text-2xl font-bold tracking-tight">Meu Perfil</h1>
+        <button class="p-2 rounded-full hover:bg-white/10 transition-colors">
+            <span class="material-symbols-outlined text-white">settings</span>
+        </button>
+    </header>
+    <main class="flex-1 overflow-y-auto no-scrollbar pb-32 px-6 pt-4 space-y-6 z-10">
+        <div class="flex items-start gap-4">
+            <div class="relative group">
+                <div
+                    class="w-24 h-24 rounded-full p-[3px] bg-gradient-to-tr from-primary to-blue-600 shadow-glow relative z-10">
+                    <div class="w-full h-full rounded-full bg-slate-800 overflow-hidden relative">
+                        <img alt="Profile" class="w-full h-full object-cover"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-k46CuKs8zbABM-KBTpQoyQWhYqpwvCpLlkLGGkPZ2ki5sjxYWxTX6k6BTdyL1ZVHYH9QjpLWUB7yGfq7-JfO2ofIz1bEV1vgqUXmLIgSU0CFBUTXLHk2cA638-iT-_uQTORlohIe4vSNAzFk3wIyl1DMGfcDcggVTjAH449z8ey04dWzwO8UJxdm6NeaYvJOo1BOIEfglE6VDabYy580VZMci4ifasPXgURUZMFqTp7e6lrVxPl06SBEey4aq5VuXX8wDhun0EFA" />
+                    </div>
+                </div>
+                <button
+                    class="absolute bottom-0 right-0 z-20 bg-blue-500 hover:bg-blue-400 text-white rounded-full p-1.5 shadow-lg border-2 border-background-dark transition-colors">
+                    <span class="material-symbols-outlined text-sm font-bold block">edit</span>
+                </button>
+            </div>
+            <div class="flex-1 pt-1 space-y-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Samuel Denis</h2>
+                        <p class="text-primary text-sm font-medium">@denis</p>
+                    </div>
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-500 px-3 py-1 rounded-full shadow-lg">
+                        <span class="text-xs font-bold text-white">Lvl 99</span>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 leading-snug mt-2">Corredor apaixonado pelas ruas de Ribeirão Preto!
+                    🏃‍♂️</p>
+            </div>
+        </div>
+        <div class="glass-stat-card rounded-2xl p-5 relative overflow-hidden group">
+            <div class="absolute right-0 top-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+            <div class="relative z-10 flex justify-between items-end">
+                <div>
+                    <h3 class="text-xl font-bold text-white tracking-wide mb-1">LEAGUE ELITE</h3>
+                    <p class="text-xs text-primary/80 uppercase tracking-wider font-semibold">Temporada Atual</p>
+                </div>
+                <div
+                    class="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center shadow-lg border border-white/20">
+                    <span class="material-symbols-rounded text-white text-2xl">military_tech</span>
+                </div>
+            </div>
+            <div class="mt-4 w-full h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
+                <div
+                    class="h-full bg-gradient-to-r from-primary to-blue-500 w-[85%] shadow-[0_0_10px_rgba(0,224,255,0.5)]">
+                </div>
+            </div>
+            <div class="flex justify-between mt-1.5">
+                <span class="text-[10px] text-gray-400">Bronze</span>
+                <span class="text-[10px] text-primary font-bold">Elite</span>
+            </div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+            <div class="glass-stat-card rounded-2xl p-3 flex flex-col justify-center items-center text-center h-28">
+                <span class="text-xl font-bold text-white mb-1">200<span class="text-sm text-gray-300">km</span></span>
+                <span class="text-[9px] uppercase tracking-wider text-primary/80 font-bold">Percorrido</span>
+            </div>
+            <div
+                class="glass-stat-card rounded-2xl p-3 flex flex-col justify-center items-center text-center h-28 bg-gradient-to-b from-blue-900/40 to-cyan-900/20 border-cyan-500/30 shadow-[0_0_15px_rgba(0,224,255,0.1)]">
+                <span class="text-xl font-bold text-white mb-1">4.15<span
+                        class="text-sm text-gray-300">km²</span></span>
+                <span class="text-[9px] uppercase tracking-wider text-primary/80 font-bold">Conquistado</span>
+            </div>
+            <div class="glass-stat-card rounded-2xl p-3 flex flex-col justify-center items-center text-center h-28">
+                <span class="text-xl font-bold text-white mb-1">3000</span>
+                <span class="text-[9px] uppercase tracking-wider text-primary/80 font-bold">Troféus</span>
+            </div>
+        </div>
+        <div class="flex border-b border-white/10 mt-6">
+            <button class="flex-1 pb-3 text-sm font-bold text-white border-b-2 border-primary relative">
+                Conquistas
+                <div class="absolute bottom-[-2px] left-0 right-0 h-[2px] bg-primary shadow-glow"></div>
+            </button>
+            <button class="flex-1 pb-3 text-sm font-medium text-gray-500 hover:text-gray-300 transition-colors">
+                Corridas
+            </button>
+        </div>
+        <div class="space-y-4 pt-2">
+            <h4 class="text-lg font-bold text-white">Explorador</h4>
+            <div class="glass-card rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent"></div>
+                <div
+                    class="w-14 h-14 shrink-0 metallic-icon-bg rounded-xl flex items-center justify-center border border-white/10 relative shadow-inner">
+                    <span class="material-symbols-outlined text-3xl bronze-gradient drop-shadow-md">shield</span>
+                </div>
+                <div class="flex-1 min-w-0 z-10">
+                    <h5 class="text-white font-bold text-sm">Forasteiro</h5>
+                    <p class="text-xs text-gray-400 mt-1 line-clamp-2">Capture seu primeiro território no mapa.</p>
+                </div>
+                <div
+                    class="w-8 h-8 rounded-full bg-green-500/20 border border-green-500/50 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-rounded text-green-400 text-lg">check</span>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-4 flex items-center gap-4 relative">
+                <div
+                    class="w-14 h-14 shrink-0 bg-slate-800 rounded-xl flex items-center justify-center border border-white/5 relative shadow-inner">
+                    <span class="material-symbols-outlined text-3xl text-slate-600">security</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h5 class="text-white font-bold text-sm">Socializador</h5>
+                    <p class="text-xs text-gray-400 mt-1">Convidar 10 amigos para o app.</p>
+                    <div class="mt-2 w-full h-1 bg-black/40 rounded-full overflow-hidden">
+                        <div class="h-full bg-primary w-[30%]"></div>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-1">3/10</p>
+                </div>
+                <div class="shrink-0">
+                    <span class="material-symbols-rounded text-gray-600 text-xl">lock</span>
+                </div>
+            </div>
+            <div class="mt-6">
+                <h4 class="text-lg font-bold text-white mb-3">Alistamento</h4>
+                <div class="glass-card rounded-2xl p-4 flex items-center gap-4 relative">
+                    <div
+                        class="w-14 h-14 shrink-0 bg-slate-800 rounded-xl flex items-center justify-center border border-white/5 relative shadow-inner">
+                        <span class="material-symbols-outlined text-3xl text-slate-600">local_police</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h5 class="text-white font-bold text-sm">Cadete</h5>
+                        <p class="text-xs text-gray-400 mt-1">Complete o tutorial básico.</p>
+                    </div>
+                    <div class="shrink-0">
+                        <span class="material-symbols-rounded text-gray-600 text-xl">lock</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div class="absolute bottom-6 left-6 right-6 z-50">
+        <nav
+            class="bg-surface-dark/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl px-6 py-4 flex justify-between items-center">
+            <a class="flex flex-col items-center gap-1 group opacity-60 hover:opacity-100 transition-opacity" href="#">
+                <div class="p-1.5 rounded-xl group-hover:bg-white/5 text-white transition-all">
+                    <span class="material-symbols-rounded text-2xl">home</span>
+                </div>
+                <div class="w-1 h-1 bg-transparent rounded-full"></div>
+            </a>
+            <a class="flex flex-col items-center gap-1 group opacity-60 hover:opacity-100 transition-opacity" href="#">
+                <div class="p-1.5 rounded-xl group-hover:bg-white/5 text-white transition-all">
+                    <span class="material-symbols-rounded text-2xl">map</span>
+                </div>
+                <div class="w-1 h-1 bg-transparent rounded-full"></div>
+            </a>
+            <a class="flex flex-col items-center gap-1 group opacity-60 hover:opacity-100 transition-opacity" href="#">
+                <div class="p-1.5 rounded-xl group-hover:bg-white/5 text-white transition-all">
+                    <span class="material-symbols-rounded text-2xl">emoji_events</span>
+                </div>
+                <div class="w-1 h-1 bg-transparent rounded-full"></div>
+            </a>
+            <a class="flex flex-col items-center gap-1 group opacity-60 hover:opacity-100 transition-opacity" href="#">
+                <div class="p-1.5 rounded-xl group-hover:bg-white/5 text-white transition-all">
+                    <span class="material-symbols-rounded text-2xl">search</span>
+                </div>
+                <div class="w-1 h-1 bg-transparent rounded-full"></div>
+            </a>
+            <a class="flex flex-col items-center gap-1 group" href="#">
+                <div class="p-1.5 rounded-xl bg-primary/20 text-primary transition-all">
+                    <span class="material-symbols-rounded text-2xl">person</span>
+                </div>
+                <div class="w-1 h-1 bg-primary rounded-full shadow-[0_0_5px_#00E0FF]"></div>
+            </a>
+        </nav>
+    </div>
+
+</body>
+
+</html>
+
+<!-- Edit Profile Dark Theme -->
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Edit Profile Neon Uniform Theme</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        cyan: {
+                            400: '#22d3ee',
+                            500: '#06b6d4',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                        display: ["Space Grotesk", "sans-serif"],
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        body {
+            background: linear-gradient(180deg, #050a14 0%, #000000 100%);
+            color: white;
+        }
+
+        .glass-input {
+            background-color: rgba(5, 8, 16, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(34, 211, 238, 0.4);
+            box-shadow: 0 0 10px rgba(34, 211, 238, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .glass-input:focus {
+            border-color: #22d3ee;
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.35);
+            background-color: rgba(5, 8, 16, 1);
+            outline: none;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen font-sans selection:bg-cyan-500 selection:text-white">
+    <div class="max-w-md mx-auto min-h-screen flex flex-col relative">
+        <header class="flex justify-between items-center px-6 pt-12 pb-6 z-20">
+            <button class="p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors">
+                <span class="material-symbols-outlined text-white text-2xl">arrow_back</span>
+            </button>
+            <h1 class="text-xl font-bold tracking-wide text-white font-display">Editar Perfil</h1>
+            <button class="text-sm font-medium text-white hover:text-cyan-300 transition-colors">
+                Cancelar
+            </button>
+        </header>
+        <main class="flex-1 px-6 pb-10 overflow-y-auto no-scrollbar">
+            <div class="flex flex-col items-center mb-10 relative">
+                <div class="relative group cursor-pointer">
+                    <div
+                        class="absolute inset-0 rounded-full bg-cyan-400 blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-300">
+                    </div>
+                    <img alt="Profile Picture"
+                        class="w-32 h-32 rounded-full object-cover border-[3px] border-cyan-400 relative z-10 shadow-[0_0_20px_rgba(34,211,238,0.6)]"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRhiphIAC-ahzLvmsxhOesOAo3jYEhL2t4joIvl3vhQDpXTty9Yb8n8Bd2qalm41VMFaZHNRA3R9gqvS2YL_37J1yBBSuQRY1z1bnrYDql-5qskTRVmhGPhOTSB7RusMGWxsSabXJYmr3QtqRMJsXFO20gf0kEvn-OJa00IzFI6xyxt9IpuUnGbtfXluZCD96eU99rrnDPxlETqUK-B51qbTcQ71h5jcOJQhjG_Pa50ZawltWlNJwSst12TTdjhKVmH9oNq-x4y20Z" />
+                    <div
+                        class="absolute bottom-1 right-1 z-20 bg-black rounded-full p-2.5 border border-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.4)] flex items-center justify-center">
+                        <span class="material-symbols-outlined text-cyan-400 text-xl">photo_camera</span>
+                    </div>
+                </div>
+            </div>
+            <form action="#" class="space-y-6">
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-gray-300 ml-1 uppercase tracking-wider"
+                        for="name">Nome</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <span
+                                class="material-symbols-outlined text-cyan-400 group-focus-within:text-cyan-300 transition-colors">person</span>
+                        </div>
+                        <input
+                            class="block w-full pl-12 pr-4 py-4 rounded-xl glass-input text-white placeholder-gray-500 font-medium"
+                            id="name" type="text" value="Samuel Denis" />
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-gray-300 ml-1 uppercase tracking-wider"
+                        for="username">Username</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <span
+                                class="material-symbols-outlined text-cyan-400 group-focus-within:text-cyan-300 transition-colors">alternate_email</span>
+                        </div>
+                        <input
+                            class="block w-full pl-12 pr-4 py-4 rounded-xl glass-input text-white placeholder-gray-500 font-medium"
+                            id="username" type="text" value="denis" />
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-gray-300 ml-1 uppercase tracking-wider"
+                        for="bio">Biografia</label>
+                    <textarea
+                        class="block w-full px-4 py-4 rounded-xl glass-input text-white placeholder-gray-500 font-medium resize-none"
+                        id="bio" rows="3">Corredor apaixonado pelas ruas de Ribeirão Preto! 🏃‍♂️</textarea>
+                </div>
+                <div class="pt-2">
+                    <h2 class="text-lg font-bold text-white mb-2 flex items-center gap-2 font-display tracking-wide">
+                        <span
+                            class="material-symbols-outlined text-cyan-300 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">lock_person</span>
+                        Segurança
+                    </h2>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-gray-300 ml-1 uppercase tracking-wider"
+                        for="password">Nova Senha</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <span
+                                class="material-symbols-outlined text-cyan-400 group-focus-within:text-cyan-300 transition-colors">lock</span>
+                        </div>
+                        <input
+                            class="block w-full pl-12 pr-12 py-4 rounded-xl glass-input text-white placeholder-gray-500 font-medium tracking-widest"
+                            id="password" type="password" value="password123" />
+                        <button
+                            class="absolute inset-y-0 right-0 pr-4 flex items-center text-cyan-400/70 hover:text-cyan-300 transition-colors"
+                            type="button">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="space-y-2 pb-6">
+                    <label class="block text-xs font-semibold text-gray-300 ml-1 uppercase tracking-wider"
+                        for="confirm_password">Confirmar Senha</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <span
+                                class="material-symbols-outlined text-cyan-400 group-focus-within:text-cyan-300 transition-colors">lock_reset</span>
+                        </div>
+                        <input
+                            class="block w-full pl-12 pr-4 py-4 rounded-xl glass-input text-white placeholder-gray-500 font-medium tracking-widest"
+                            id="confirm_password" placeholder="••••••••" type="password" />
+                    </div>
+                </div>
+                <button
+                    class="w-full py-4 rounded-xl btn-gradient text-white font-bold text-lg shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] hover:brightness-110 transition-all uppercase tracking-wider font-display border border-white/20"
+                    type="submit">
+                    Salvar Alterações
+                </button>
+            </form>
+        </main>
+    </div>
+
+</body>
+
+</html>
+
+<!-- Main Run Dashboard -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Login Screen Neon Theme</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#00E0FF", // Electric Cyan
+                        secondary: "#3B82F6", // Blue
+                        "background-light": "#F0F4F8",
+                        "background-dark": "#0B1120", // Deep dark blue
+                        "surface-dark": "rgba(15, 23, 42, 0.8)",
+                    },
+                    fontFamily: {
+                        display: ['"Exo 2"', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'gradient-primary': 'linear-gradient(135deg, #00E0FF 0%, #3B82F6 100%)',
+                        'gradient-dark-overlay': 'linear-gradient(to bottom, rgba(11, 17, 32, 0.7) 0%, rgba(11, 17, 32, 0.4) 40%, rgba(11, 17, 32, 0.95) 100%)',
+                    },
+                    boxShadow: {
+                        'glow': '0 0 20px rgba(0, 224, 255, 0.5)',
+                        'glow-input': '0 0 10px rgba(0, 224, 255, 0.2)',
+                    }
+                },
+            },
+        };
+    </script>
+    <style>
+        .map-bg {
+            background-color: #0f172a;
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .road {
+            position: absolute;
+            background: rgba(0, 224, 255, 0.15);
+            box-shadow: 0 0 8px rgba(0, 224, 255, 0.2);
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        .glass-input {
+            background: rgba(11, 17, 32, 0.85);
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes float-logo {
+            0% {
+                transform: translateY(0px);
+                box-shadow: 0 0 20px rgba(0, 224, 255, 0.3);
+            }
+
+            50% {
+                transform: translateY(-5px);
+                box-shadow: 0 0 30px rgba(0, 224, 255, 0.5);
+            }
+
+            100% {
+                transform: translateY(0px);
+                box-shadow: 0 0 20px rgba(0, 224, 255, 0.3);
+            }
+        }
+
+        .logo-glow {
+            animation: float-logo 4s ease-in-out infinite;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(800px, 100dvh);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-dark font-display h-screen w-screen overflow-hidden text-white antialiased selection:bg-primary selection:text-white">
+    <div class="absolute inset-0 z-0 map-bg">
+        <div class="road w-[80%] h-1 top-1/4 left-0 rotate-12 opacity-40"></div>
+        <div class="road w-1 h-[60%] top-0 left-1/3 rotate-6 opacity-40"></div>
+        <div
+            class="road w-[120%] h-1.5 bottom-1/3 -left-10 -rotate-12 bg-primary/20 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+        </div>
+        <div class="road w-1 h-[40%] bottom-0 right-1/4 rotate-3 opacity-30"></div>
+        <div class="road w-[50%] h-1 top-10 right-0 -rotate-45 opacity-30"></div>
+        <div class="absolute inset-0 bg-gradient-dark-overlay pointer-events-none"></div>
+    </div>
+    <div class="relative z-10 flex flex-col h-full px-8 py-10 overflow-y-auto justify-center">
+        <div class="flex flex-col mb-10 mt-auto">
+            <div
+                class="w-16 h-16 rounded-full border-2 border-primary/50 flex items-center justify-center mb-4 logo-glow bg-background-dark/50">
+                <span class="material-symbols-rounded text-primary text-4xl">location_on</span>
+            </div>
+            <h1 class="text-5xl font-bold tracking-tight mb-2 text-white drop-shadow-lg">Domrun</h1>
+            <p class="text-primary/80 text-lg font-medium tracking-wide">Domine as ruas da sua cidade.</p>
+        </div>
+        <div class="flex flex-col gap-5 w-full">
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span
+                        class="material-symbols-rounded text-primary/70 group-focus-within:text-primary transition-colors">person</span>
+                </div>
+                <input
+                    class="w-full glass-input text-white border border-primary/40 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 focus:shadow-glow-input transition-all placeholder:text-slate-400 font-medium"
+                    placeholder="Email ou Nome de Usuário" type="text" />
+            </div>
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span
+                        class="material-symbols-rounded text-primary/70 group-focus-within:text-primary transition-colors">lock</span>
+                </div>
+                <input
+                    class="w-full glass-input text-white border border-primary/40 rounded-2xl py-4 pl-12 pr-12 outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 focus:shadow-glow-input transition-all placeholder:text-slate-400 font-medium"
+                    placeholder="Senha" type="password" />
+                <button
+                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-primary/70 hover:text-white transition-colors">
+                    <span class="material-symbols-rounded">visibility_off</span>
+                </button>
+            </div>
+            <div class="flex justify-end">
+                <a class="text-sm text-slate-300 hover:text-primary transition-colors" href="#">Esqueceu a senha?</a>
+            </div>
+            <button
+                class="w-full bg-gradient-primary text-white font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 active:scale-[0.98] transition-all hover:shadow-glow mt-2">
+                <span>ENTRAR</span>
+                <span class="material-symbols-rounded">arrow_forward</span>
+            </button>
+        </div>
+        <div class="mt-8 flex flex-col items-center w-full">
+            <div class="flex items-center w-full gap-4 mb-6">
+                <div class="h-[1px] bg-gradient-to-r from-transparent via-slate-600 to-transparent flex-1"></div>
+                <span class="text-xs text-slate-400 uppercase tracking-widest">Ou entre com</span>
+                <div class="h-[1px] bg-gradient-to-r from-transparent via-slate-600 to-transparent flex-1"></div>
+            </div>
+            <div class="flex gap-4 w-full">
+                <button
+                    class="flex-1 glass-input border border-primary/30 rounded-2xl py-3 flex items-center justify-center gap-2 hover:bg-white/5 active:scale-95 transition-all group">
+                    <svg class="w-5 h-5 fill-white" viewBox="0 0 384 512">
+                        <path
+                            d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z">
+                        </path>
+                    </svg>
+                    <span class="font-medium text-white group-hover:text-primary transition-colors">Apple</span>
+                </button>
+                <button
+                    class="flex-1 glass-input border border-primary/30 rounded-2xl py-3 flex items-center justify-center gap-2 hover:bg-white/5 active:scale-95 transition-all group">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24">
+                        <path
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                            fill="#4285F4"></path>
+                        <path
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                            fill="#34A853"></path>
+                        <path
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                            fill="#FBBC05"></path>
+                        <path
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                            fill="#EA4335"></path>
+                    </svg>
+                    <span class="font-medium text-white group-hover:text-primary transition-colors">Google</span>
+                </button>
+            </div>
+        </div>
+        <div class="mt-auto pt-10 text-center pb-4">
+            <p class="text-slate-400 text-sm">
+                Ainda não corre com a gente?
+                <a class="text-primary font-bold hover:text-white transition-colors ml-1" href="#">Criar Conta</a>
+            </p>
+        </div>
+    </div>
+    <div
+        class="fixed inset-0 pointer-events-none opacity-[0.03] z-50 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
+    </div>
+
+</body>
+
+</html>
+
+<!-- Main Run Dashboard -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Criar Conta - Neon Run</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#00E0FF", // Electric Cyan
+                        secondary: "#3B82F6", // Blue
+                        "background-light": "#F0F4F8",
+                        "background-dark": "#0B1120", // Deep dark blue
+                        "surface-dark": "rgba(15, 23, 42, 0.6)",
+                        "surface-glass": "rgba(255, 255, 255, 0.05)",
+                    },
+                    fontFamily: {
+                        display: ['"Exo 2"', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'gradient-primary': 'linear-gradient(135deg, #00E0FF 0%, #3B82F6 100%)',
+                        'gradient-dark-overlay': 'linear-gradient(to bottom, rgba(11, 17, 32, 0.85) 0%, rgba(11, 17, 32, 0.4) 50%, rgba(11, 17, 32, 0.95) 100%)',
+                    },
+                    boxShadow: {
+                        'glow': '0 0 20px rgba(0, 224, 255, 0.5)',
+                        'glow-input': '0 0 8px rgba(0, 224, 255, 0.25)',
+                        'glow-btn': '0 0 15px rgba(59, 130, 246, 0.5)',
+                    }
+                },
+            },
+        };
+    </script>
+    <style>
+        .map-bg {
+            background-color: #0f172a;
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .road {
+            position: absolute;
+            background: rgba(0, 224, 255, 0.15);
+            box-shadow: 0 0 8px rgba(0, 224, 255, 0.2);
+            border-radius: 999px;
+        }
+
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
+            -webkit-text-fill-color: white !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .floating-element {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-dark font-display h-screen w-screen overflow-hidden text-white antialiased selection:bg-primary selection:text-white">
+    <div class="absolute inset-0 z-0 map-bg">
+        <div class="road w-[80%] h-1 top-1/4 left-0 rotate-12 opacity-40"></div>
+        <div class="road w-1 h-[60%] top-0 left-1/3 rotate-6 opacity-40"></div>
+        <div
+            class="road w-[120%] h-1.5 bottom-1/3 -left-10 -rotate-12 bg-primary/20 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+        </div>
+        <div class="road w-1 h-[40%] bottom-0 right-1/4 rotate-3 opacity-30"></div>
+        <div class="road w-[50%] h-1 top-10 right-0 -rotate-45 opacity-30"></div>
+        <div class="absolute top-[15%] right-[10%] opacity-40 blur-[1px]">
+            <span class="material-icons text-primary text-2xl">location_on</span>
+        </div>
+        <div class="absolute bottom-[20%] left-[5%] opacity-30 blur-[1px]">
+            <span class="material-icons text-secondary text-2xl">emoji_events</span>
+        </div>
+        <div class="absolute inset-0 bg-gradient-dark-overlay pointer-events-none"></div>
+    </div>
+    <div class="relative z-10 flex flex-col h-full w-full max-w-md mx-auto px-6 overflow-y-auto pt-10 pb-6">
+        <div class="flex flex-col items-center mt-10 mb-8 floating-element">
+            <div
+                class="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center border border-primary/30 shadow-glow mb-4 backdrop-blur-md">
+                <span class="material-symbols-rounded text-primary text-4xl">person_add</span>
+            </div>
+            <h1 class="text-3xl font-bold text-white tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Criar Conta
+            </h1>
+            <p class="text-gray-400 text-sm mt-2 text-center">Preencha os dados para começar sua jornada</p>
+        </div>
+        <form class="flex flex-col gap-4 w-full" onsubmit="event.preventDefault()">
+            <div class="group relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span
+                        class="material-symbols-rounded text-primary/70 group-focus-within:text-primary transition-colors text-[20px]">mail</span>
+                </div>
+                <input
+                    class="w-full bg-surface-glass border border-white/10 text-white text-sm rounded-xl pl-10 pr-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 placeholder-gray-500 backdrop-blur-sm transition-all shadow-sm focus:shadow-glow-input"
+                    placeholder="Email" required="" type="email" />
+            </div>
+            <div class="group relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span
+                        class="material-symbols-rounded text-primary/70 group-focus-within:text-primary transition-colors text-[20px]">badge</span>
+                </div>
+                <input
+                    class="w-full bg-surface-glass border border-white/10 text-white text-sm rounded-xl pl-10 pr-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 placeholder-gray-500 backdrop-blur-sm transition-all shadow-sm focus:shadow-glow-input"
+                    placeholder="Nome completo" required="" type="text" />
+            </div>
+            <div class="group relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span
+                        class="material-symbols-rounded text-primary/70 group-focus-within:text-primary transition-colors text-[20px]">alternate_email</span>
+                </div>
+                <input
+                    class="w-full bg-surface-glass border border-white/10 text-white text-sm rounded-xl pl-10 pr-4 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 placeholder-gray-500 backdrop-blur-sm transition-all shadow-sm focus:shadow-glow-input"
+                    placeholder="Nome de usuário" required="" type="text" />
+            </div>
+            <div class="group relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span
+                        class="material-symbols-rounded text-primary/70 group-focus-within:text-primary transition-colors text-[20px]">lock</span>
+                </div>
+                <input
+                    class="w-full bg-surface-glass border border-white/10 text-white text-sm rounded-xl pl-10 pr-10 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 placeholder-gray-500 backdrop-blur-sm transition-all shadow-sm focus:shadow-glow-input"
+                    placeholder="Senha" required="" type="password" />
+                <div
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer hover:text-white text-gray-400 transition-colors">
+                    <span class="material-symbols-rounded text-[20px]">visibility_off</span>
+                </div>
+            </div>
+            <div class="group relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span
+                        class="material-symbols-rounded text-primary/70 group-focus-within:text-primary transition-colors text-[20px]">lock_reset</span>
+                </div>
+                <input
+                    class="w-full bg-surface-glass border border-white/10 text-white text-sm rounded-xl pl-10 pr-10 py-3.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 placeholder-gray-500 backdrop-blur-sm transition-all shadow-sm focus:shadow-glow-input"
+                    placeholder="Confirmar senha" required="" type="password" />
+                <div
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer hover:text-white text-gray-400 transition-colors">
+                    <span class="material-symbols-rounded text-[20px]">visibility_off</span>
+                </div>
+            </div>
+            <button class="w-full mt-4 relative group overflow-hidden rounded-xl p-[1px]">
+                <div
+                    class="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-600 rounded-xl blur opacity-75 group-hover:opacity-100 transition duration-200">
+                </div>
+                <div
+                    class="relative w-full bg-gradient-primary hover:brightness-110 text-white font-bold py-3.5 px-4 rounded-xl shadow-glow-btn transition-all active:scale-[0.98] flex items-center justify-center tracking-widest uppercase text-sm">
+                    Criar Conta
+                </div>
+            </button>
+        </form>
+        <div class="mt-auto pt-8 flex items-center justify-center gap-3 w-full">
+            <span class="text-cyan-100/70 text-sm">Já tem uma conta?</span>
+            <button
+                class="px-5 py-2 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-semibold backdrop-blur-sm hover:bg-primary/20 hover:shadow-glow-sm transition-all active:scale-95">
+                Entrar
+            </button>
+        </div>
+    </div>
+    <div
+        class="fixed inset-0 pointer-events-none opacity-[0.05] z-50 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
+    </div>
+</body>
+
+</html>
+
+<!-- Password Recovery Neon Theme -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Recuperar Senha - Neon Run</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&amp;family=Roboto:wght@300;400;500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#00E5FF", // Vibrant Cyan
+                        secondary: "#2979FF", // Electric Blue
+                        "background-light": "#F0F4F8", // Fallback for light mode (though this design is heavily dark)
+                        "background-dark": "#050B14", // Deep Navy/Black
+                        "surface-dark": "#0F172A", // Slightly lighter dark for inputs
+                    },
+                    fontFamily: {
+                        display: ['Orbitron', 'sans-serif'],
+                        body: ['Roboto', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'neon': '0 0 10px rgba(0, 229, 255, 0.5), 0 0 20px rgba(0, 229, 255, 0.3)',
+                        'neon-strong': '0 0 15px rgba(0, 229, 255, 0.7), 0 0 30px rgba(0, 229, 255, 0.4)',
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                    }
+                },
+            },
+        };
+    </script>
+    <style>
+        .map-bg {
+            background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuCU_F3lzM5HlbbbAyKfntikYuqhOgB6pHeLujTaBeGj_OLH11gI3AGqkwAA0dco99FoMrUPzOYG3EW3YVMWm-XH7H1AVbwc3X_hjSRa4U0NwKqJP9n_z5mNXSez5-Pck23seFXKQlF2hxyWwzgGoXqiLzorI3mPYZHf19kqEs-S01XiHsvy-XlwQDjq4-wTOM8FmhCKoMQSfqHmkM0irHD3Hm4Dz5Xh25Uhji3xSHlstQO-9GOg3j1SnwOD4uWznATZELBSG18rkRLx);
+            background-size: cover;
+            background-position: center;
+            opacity: 0.15;
+            mix-blend-mode: luminosity
+        }
+
+        .scanlines {
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1));
+            background-size: 100% 4px
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark min-h-screen font-body flex flex-col relative overflow-hidden text-gray-800 dark:text-gray-100 antialiased selection:bg-primary selection:text-black">
+    <div class="absolute inset-0 z-0 bg-gradient-to-b from-slate-900 to-[#020617]"></div>
+    <div class="absolute inset-0 z-0 map-bg pointer-events-none"></div>
+    <div
+        class="absolute inset-0 z-0 bg-gradient-to-t from-background-dark via-transparent to-transparent pointer-events-none">
+    </div>
+    <div class="absolute top-1/4 -right-20 w-64 h-64 bg-primary/20 rounded-full blur-[80px] pointer-events-none"></div>
+    <div class="absolute bottom-1/3 -left-20 w-64 h-64 bg-secondary/20 rounded-full blur-[80px] pointer-events-none">
+    </div>
+    <div class="absolute inset-0 z-10 scanlines pointer-events-none opacity-30"></div>
+    <div
+        class="relative z-20 flex flex-col h-full min-h-screen px-6 pt-12 pb-8 max-w-md mx-auto w-full justify-between">
+        <div>
+            <button
+                class="mb-8 p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors text-white dark:text-white group">
+                <span
+                    class="material-icons-round text-3xl group-hover:-translate-x-1 transition-transform">arrow_back</span>
+            </button>
+            <div class="space-y-3 mb-12">
+                <h1 class="text-3xl md:text-4xl font-display font-bold text-white tracking-wide drop-shadow-md">
+                    Recuperar <br />
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Senha</span>
+                </h1>
+                <p class="text-primary/70 dark:text-primary/70 text-base md:text-lg font-light leading-relaxed">
+                    Não se preocupe. Digite seu email para receber as instruções de recuperação.
+                </p>
+            </div>
+            <form class="space-y-8" onsubmit="event.preventDefault();">
+                <div class="group relative">
+                    <div
+                        class="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-xl blur opacity-20 group-hover:opacity-60 transition duration-500">
+                    </div>
+                    <div
+                        class="relative flex items-center bg-white/5 dark:bg-surface-dark/80 backdrop-blur-md border border-white/10 dark:border-white/10 rounded-xl px-4 py-4 focus-within:border-primary/80 focus-within:shadow-neon transition-all duration-300">
+                        <span class="material-icons-round text-primary mr-3 text-2xl">mail_outline</span>
+                        <div class="flex-1">
+                            <label class="sr-only" for="email">Email</label>
+                            <input
+                                class="w-full bg-transparent border-none text-white placeholder-gray-400 focus:ring-0 p-0 text-lg"
+                                id="email" name="email" placeholder="exemplo@email.com" required="" type="email" />
+                        </div>
+                    </div>
+                </div>
+                <button
+                    class="w-full group relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden rounded-xl font-display font-bold text-white focus:ring-4 focus:outline-none focus:ring-primary/40 active:scale-95 transition-transform duration-200"
+                    type="submit">
+                    <span
+                        class="absolute w-full h-full bg-gradient-to-br from-primary via-secondary to-primary group-hover:from-secondary group-hover:to-primary transition-all duration-300"></span>
+                    <span
+                        class="relative w-full px-6 py-4 transition-all ease-in duration-75 bg-gray-900/0 rounded-xl flex items-center justify-center gap-2 text-lg tracking-widest uppercase">
+                        Enviar
+                        <span
+                            class="material-icons-round text-xl transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300">send</span>
+                    </span>
+                    <div
+                        class="absolute -bottom-4 left-0 right-0 h-4 bg-primary/40 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    </div>
+                </button>
+            </form>
+        </div>
+        <div class="text-center">
+            <div
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/5 backdrop-blur-sm">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]"></div>
+                <span class="text-xs font-display text-gray-400 uppercase tracking-widest">System Online</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Simple script to toggle dark mode for demonstration if needed, 
+        // though the design is inherently dark mode based on the prompt.
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.add('dark') // Forcing dark mode for this specific neon theme request
+        }
+    </script>
+
+</body>
+
+</html>
+
+<!-- Friends List Neon Theme -->
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Friends List Neon Theme</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0dccf2",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#020a12", // Deep navy base
+                        "card-bg": "rgba(255, 255, 255, 0.03)",
+                        "card-border": "rgba(13, 204, 242, 0.2)",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    boxShadow: {
+                        'neon': '0 0 10px rgba(13, 204, 242, 0.4), 0 0 20px rgba(13, 204, 242, 0.2)',
+                        'neon-sm': '0 0 5px rgba(13, 204, 242, 0.5)',
+                        'neon-text': '0 0 5px rgba(13, 204, 242, 0.6)',
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #020a12;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0dccf2;
+            border-radius: 3px;
+        }
+
+        /* Gradient Background Wrapper */
+        .neon-gradient-bg {
+            background: linear-gradient(180deg, #020a12 0%, #000000 100%);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body
+    class="neon-gradient-bg text-white font-display min-h-screen flex flex-col antialiased selection:bg-primary selection:text-black overflow-x-hidden">
+    <!-- Top App Bar -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-[#020a12]/80 border-b border-primary/10">
+        <div class="flex items-center p-4 pb-2 justify-between">
+            <button
+                class="text-white hover:text-primary transition-colors flex size-12 shrink-0 items-center justify-center rounded-full active:bg-white/5">
+                <span class="material-symbols-outlined text-3xl">arrow_back_ios_new</span>
+            </button>
+            <h2
+                class="text-white text-xl font-bold leading-tight tracking-wider uppercase flex-1 text-center pr-12 drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]">
+                Meus Amigos
+            </h2>
+        </div>
+    </header>
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col p-4 space-y-6 pb-24">
+        <!-- Search Bar -->
+        <div class="relative group">
+            <div
+                class="absolute -inset-0.5 bg-gradient-to-r from-primary to-[#00ff9d] rounded-xl blur opacity-25 group-focus-within:opacity-75 transition duration-500">
+            </div>
+            <div
+                class="relative flex w-full items-center rounded-xl bg-[#081218] border border-primary/30 h-12 overflow-hidden shadow-neon-sm focus-within:shadow-neon transition-all duration-300">
+                <div class="flex items-center justify-center pl-4 text-primary">
+                    <span class="material-symbols-outlined">search</span>
+                </div>
+                <input
+                    class="form-input w-full bg-transparent border-none text-white placeholder-slate-500 focus:ring-0 px-4 font-body"
+                    placeholder="Search for a runner..." type="text" />
+            </div>
+        </div>
+        <!-- Section Label -->
+        <div class="flex justify-between items-end px-1">
+            <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-primary/80">Online Runners</h3>
+            <span class="text-[10px] text-slate-500 font-mono">3 ACTIVE</span>
+        </div>
+        <!-- Friends List -->
+        <div class="flex flex-col space-y-4">
+            <!-- Friend Card 1: Elite -->
+            <div class="relative group">
+                <!-- Glowing border effect on hover -->
+                <div
+                    class="absolute -inset-[1px] bg-gradient-to-r from-primary/50 to-transparent rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition duration-500">
+                </div>
+                <div
+                    class="relative flex items-center gap-4 bg-card-bg backdrop-blur-md border border-card-border rounded-2xl p-4 shadow-lg overflow-hidden">
+                    <!-- Avatar with glowing ring -->
+                    <div class="relative shrink-0">
+                        <div class="absolute -inset-1 rounded-full bg-primary blur-sm opacity-50"></div>
+                        <div
+                            class="relative h-14 w-14 rounded-full p-[2px] bg-gradient-to-tr from-primary to-transparent">
+                            <div class="h-full w-full rounded-full bg-black/50 overflow-hidden">
+                                <div class="bg-center bg-no-repeat bg-cover w-full h-full"
+                                    data-alt="Cyberpunk style portrait of a runner with neon goggles"
+                                    style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA02V3ZhRaAqcnvFbifXAP5XC0nmUAoirD9f2SGDJbn1UQTUlPNn7w4v1EcWtufhKqW0vqXwN5PlZLptwENQH68QIl2URWYRQ-svJ_S7oEsqutxbjLkfpQmYcogFYCkREHl71_aafnfzW33ztGyD6cng2b7W31HkWoNXNuSiK1Yq5qflcR_oT6E9-mgeunL5dxSnzTvg1P9I2Q9hh_bNrVHfhqW8hZWW3nMSXTleOI_XeZlhm0ojY2x25l5Fj4zA22iOojgPV03EIOb");'>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-[#020a12] shadow-[0_0_5px_#22c55e]">
+                        </div>
+                    </div>
+                    <!-- Info -->
+                    <div class="flex flex-col flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <p class="text-white text-lg font-bold truncate tracking-wide">CyberRunner99</p>
+                            <span
+                                class="bg-primary/20 text-primary text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider border border-primary/30">Elite</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 mt-1 text-slate-400 text-sm font-body">
+                            <span class="material-symbols-outlined text-yellow-400 text-[16px]"
+                                style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+                            <span class="font-medium text-slate-300">12,450</span>
+                            <span class="text-slate-600 text-[10px]">•</span>
+                            <span class="text-xs">Lvl 42</span>
+                        </div>
+                    </div>
+                    <!-- Action Button -->
+                    <button
+                        class="shrink-0 group/btn relative flex items-center justify-center size-10 rounded-xl bg-primary/10 hover:bg-primary border border-primary/30 transition-all duration-300 active:scale-95">
+                        <span
+                            class="material-symbols-outlined text-primary group-hover/btn:text-black transition-colors">swords</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Friend Card 2: Prata -->
+            <div class="relative group">
+                <div
+                    class="relative flex items-center gap-4 bg-card-bg backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-lg overflow-hidden hover:border-primary/40 transition-colors">
+                    <div class="relative shrink-0">
+                        <div class="h-14 w-14 rounded-full border-2 border-slate-600 overflow-hidden">
+                            <div class="bg-center bg-no-repeat bg-cover w-full h-full"
+                                data-alt="Futuristic portrait of a female runner with glowing blue hair highlights"
+                                style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAk1EBL3i3itVJx_4fUmkmxJuZWECkN3o5D7kmFkH4gwj1oWi1j-2FGr362AmKTveWOPixkgrdDxgaL_9jwhofK0KCn3AVwLQZzkiSE5dY35Oq9bN0Vu2xr-ZuGuCoJQPow1VSUbxMINodSY7xHWKPm98lw0sSq490DBvKZFV7X3havsVs8mCroWQK9kHlEgWyH7UaywKQxosKo5eLO_uAU3DGjg_raioWV2O2bE4P-nfH4Vjw26uTegFVasExnP3XbbPd8C_IApAZl");'>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-[#020a12] shadow-[0_0_5px_#22c55e]">
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <p class="text-white text-lg font-bold truncate tracking-wide">NeonPulse</p>
+                            <span
+                                class="bg-slate-700/50 text-slate-300 text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider border border-slate-600">Prata</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 mt-1 text-slate-400 text-sm font-body">
+                            <span class="material-symbols-outlined text-slate-400 text-[16px]"
+                                style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+                            <span class="font-medium text-slate-300">8,320</span>
+                            <span class="text-slate-600 text-[10px]">•</span>
+                            <span class="text-xs">Lvl 28</span>
+                        </div>
+                    </div>
+                    <button
+                        class="shrink-0 group/btn flex items-center justify-center size-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all active:scale-95">
+                        <span
+                            class="material-symbols-outlined text-white/70 group-hover/btn:text-white">visibility</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Friend Card 3: Bronze -->
+            <div class="relative group">
+                <div
+                    class="relative flex items-center gap-4 bg-card-bg backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-lg overflow-hidden hover:border-primary/40 transition-colors">
+                    <div class="relative shrink-0">
+                        <div class="h-14 w-14 rounded-full border-2 border-amber-700/50 overflow-hidden">
+                            <div class="bg-center bg-no-repeat bg-cover w-full h-full"
+                                data-alt="Close up of a runner wearing a high tech visor"
+                                style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDVnhKkYmkE1AMSBBDy3t5vDt9pvUbcUHG6ZCnQ4Tbmz-2K7gj7-vobKpU9XNVRlT2XGfAT2T8rBKeDSKV6s91G-3-f3aWM0Y2LsjM7DKNMN3KxMZDfGNwSDSDLkEppNWlJETTM9HWktYp6QopaPudaHNc5CX_MlxRuICG2oFSxiirDV1spHhcz0vnKnDcoDGiAsCPbZu8EU0_4XENRdWfQLRrsFe8O_xoJlp8mMZJJUS3FxuE-4Ymj4SH_toZQ7FntrQ-AYBLVmbcI");'>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute bottom-0 right-0 h-3 w-3 bg-slate-600 rounded-full border-2 border-[#020a12]">
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <p class="text-white text-lg font-bold truncate tracking-wide">SpeedDemon</p>
+                            <span
+                                class="bg-amber-900/30 text-amber-500 text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider border border-amber-900/50">Bronze</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 mt-1 text-slate-400 text-sm font-body">
+                            <span class="material-symbols-outlined text-amber-700 text-[16px]"
+                                style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+                            <span class="font-medium text-slate-300">2,100</span>
+                            <span class="text-slate-600 text-[10px]">•</span>
+                            <span class="text-xs">Lvl 12</span>
+                        </div>
+                    </div>
+                    <button
+                        class="shrink-0 group/btn relative flex items-center justify-center size-10 rounded-xl bg-primary/10 hover:bg-primary border border-primary/30 transition-all duration-300 active:scale-95">
+                        <span
+                            class="material-symbols-outlined text-primary group-hover/btn:text-black transition-colors">swords</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Offline Section -->
+            <div class="flex justify-between items-end px-1 pt-4 opacity-60">
+                <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Offline</h3>
+            </div>
+            <!-- Friend Card 4: Offline -->
+            <div class="relative group opacity-60 hover:opacity-100 transition-opacity">
+                <div
+                    class="relative flex items-center gap-4 bg-card-bg backdrop-blur-md border border-white/5 rounded-2xl p-4 shadow-sm overflow-hidden">
+                    <div class="relative shrink-0">
+                        <div class="h-14 w-14 rounded-full border border-slate-700 grayscale overflow-hidden">
+                            <div class="bg-center bg-no-repeat bg-cover w-full h-full"
+                                data-alt="Black and white portrait of a determined athlete"
+                                style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBhZxok-N8GdVHEirIJBrjXC5macv7acvy-_dbb4R24AvzzJmfFW04sOciRBxa_cO8mvSCh5QnuoCtJ4v0c9hdcjvWnmEvCg-T4yItkaquM06i8L3uUezLQsDYwU2FsERUL2GOXjjPSR2sUkvWJ3GX-W_aeBX6ejIrCaslvq2m9KCar-AdV_KpTtHkuLfmXJV0AfhjWO91_QI4UsT5ZbKnzZYif7CYI5tmDdwA7XvtmYvJ5sdqjwgRl5hKsR_Erwp_Fv3nkEZOcU9wS");'>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute bottom-0 right-0 h-3 w-3 bg-slate-700 rounded-full border-2 border-[#020a12]">
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <p class="text-slate-300 text-lg font-medium truncate tracking-wide">GhostRunner</p>
+                            <span
+                                class="bg-slate-800/50 text-slate-500 text-[10px] px-1.5 py-0.5 rounded uppercase font-bold tracking-wider border border-slate-700">Gold</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 mt-1 text-slate-500 text-sm font-body">
+                            <span class="material-symbols-outlined text-slate-600 text-[16px]"
+                                style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+                            <span class="font-medium text-slate-500">5,430</span>
+                            <span class="text-slate-600 text-[10px]">•</span>
+                            <span class="text-xs">Last seen 2d ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Add Friend CTA -->
+        <div class="mt-8 mb-4">
+            <button
+                class="w-full relative group overflow-hidden rounded-xl bg-gradient-to-r from-primary/10 to-blue-600/10 border border-primary/20 hover:border-primary/60 transition-all p-4 flex items-center justify-center gap-3">
+                <div
+                    class="absolute inset-0 bg-primary/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                </div>
+                <span
+                    class="material-symbols-outlined text-primary group-hover:shadow-neon-text transition-shadow">person_add</span>
+                <span
+                    class="font-display font-bold uppercase tracking-widest text-sm text-white group-hover:text-primary transition-colors">Invite
+                    Runners</span>
+            </button>
+        </div>
+    </main>
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 w-full z-50 bg-[#020a12]/90 backdrop-blur-xl border-t border-white/10 pb-safe">
+        <div class="flex items-center justify-around h-20 px-2 pb-2">
+            <a class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-white transition-colors" href="#">
+                <span class="material-symbols-outlined text-2xl">home</span>
+                <span class="text-[10px] font-medium tracking-wide">HOME</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-white transition-colors" href="#">
+                <span class="material-symbols-outlined text-2xl">directions_run</span>
+                <span class="text-[10px] font-medium tracking-wide">RUN</span>
+            </a>
+            <a class="relative flex flex-col items-center gap-1 p-2 text-primary transition-colors" href="#">
+                <!-- Active Indicator Glow -->
+                <div class="absolute -top-[1px] left-1/2 -translate-x-1/2 w-12 h-[2px] bg-primary shadow-neon"></div>
+                <div class="absolute inset-0 bg-primary/5 rounded-xl blur-xl"></div>
+                <span class="material-symbols-outlined text-2xl drop-shadow-[0_0_8px_rgba(13,204,242,0.8)]"
+                    style="font-variation-settings: 'FILL' 1;">groups</span>
+                <span
+                    class="text-[10px] font-bold tracking-wide drop-shadow-[0_0_5px_rgba(13,204,242,0.5)]">FRIENDS</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-white transition-colors" href="#">
+                <span class="material-symbols-outlined text-2xl">person</span>
+                <span class="text-[10px] font-medium tracking-wide">PROFILE</span>
+            </a>
+        </div>
+    </nav>
+    <!-- Safe area spacing for iOS home indicator -->
+    <div class="h-6"></div>
+</body>
+
+</html>
+
+<!-- Global Leaderboard Neon -->
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Global Leaderboard Neon</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0dccf2",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#020617", // Deep navy/black
+                        "card-dark": "#0f172a",
+                        "gold": "#FFD700",
+                        "silver": "#C0C0C0",
+                        "bronze": "#CD7F32",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    boxShadow: {
+                        "neon-primary": "0 0 10px rgba(13, 204, 242, 0.5)",
+                        "neon-gold": "0 0 15px rgba(255, 215, 0, 0.6)",
+                        "neon-silver": "0 0 10px rgba(192, 192, 192, 0.5)",
+                        "neon-bronze": "0 0 10px rgba(205, 127, 50, 0.5)",
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #020617;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0dccf2;
+            border-radius: 4px;
+        }
+
+        /* Subtle grid background pattern */
+        .bg-grid-pattern {
+            background-image: linear-gradient(rgba(13, 204, 242, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(13, 204, 242, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body
+    class="antialiased font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white selection:bg-primary selection:text-black">
+    <div class="relative flex min-h-screen w-full flex-col overflow-hidden bg-background-dark bg-grid-pattern">
+        <!-- Top App Bar -->
+        <header
+            class="sticky top-0 z-40 flex items-center justify-between p-4 bg-background-dark/80 backdrop-blur-md border-b border-white/5">
+            <button
+                class="flex items-center justify-center size-10 rounded-full text-white hover:bg-white/10 active:scale-95 transition-all">
+                <span class="material-symbols-outlined">arrow_back_ios_new</span>
+            </button>
+            <h1 class="text-xl font-bold tracking-tight text-white uppercase glow-text">Ranking Global</h1>
+            <button
+                class="flex items-center justify-center size-10 rounded-full text-white hover:bg-white/10 active:scale-95 transition-all">
+                <span class="material-symbols-outlined">tune</span>
+            </button>
+        </header>
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col items-center w-full pb-32">
+            <!-- Podium Section -->
+            <section class="w-full px-6 pt-8 pb-10">
+                <div class="flex items-end justify-center gap-4 sm:gap-8 w-full max-w-md mx-auto relative">
+                    <!-- Rank 2 -->
+                    <div class="flex flex-col items-center gap-2 w-1/3 order-1 relative z-10">
+                        <div class="relative group">
+                            <div
+                                class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-silver shadow-neon-silver p-1 bg-background-dark overflow-hidden">
+                                <div class="w-full h-full rounded-full bg-cover bg-center"
+                                    data-alt="Portrait of the second place runner"
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD_tVjkljknxsAX8FmAtAWJVPljsHD6ueq0KovjnePnSNJDDVZQeQUkRvtsQgdlhycxb7_TVJkWmbuSCoxv0RAAqdjSqmObzeBG9jpXXbGb5TVHIsyoOoxUzW8XAQuWbQXGv-7RCB4JGPgi-rqCo945_s7o00z3F2mIW66op2iD7Z7KitDNsjzTu20lRVm3sOU1fLc2jkwMEJOzgEt2CLYnARe2lMrIhaJFQvX-sc7fBXB9Qa81ITAal36FEbWBv79bOI3NYxtOZh4E');">
+                                </div>
+                            </div>
+                            <div
+                                class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-silver text-black text-xs font-bold px-2 py-0.5 rounded-full shadow-neon-silver">
+                                #2
+                            </div>
+                        </div>
+                        <div class="text-center mt-2">
+                            <p class="text-white font-bold text-sm truncate w-full">NeonDash</p>
+                            <p class="text-silver text-xs font-medium">11,200 🏆</p>
+                        </div>
+                    </div>
+                    <!-- Rank 1 -->
+                    <div class="flex flex-col items-center gap-2 w-1/3 order-2 -mt-8 relative z-20">
+                        <div class="absolute -top-8 text-gold animate-bounce">
+                            <span class="material-symbols-outlined" style="font-size: 32px;">crown</span>
+                        </div>
+                        <div class="relative group scale-110">
+                            <div
+                                class="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-gold shadow-neon-gold p-1 bg-background-dark overflow-hidden ring-4 ring-gold/20">
+                                <div class="w-full h-full rounded-full bg-cover bg-center"
+                                    data-alt="Portrait of the first place winner"
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuADqV52gEvFT0tXc1gS1VVn-FtgEP-QHMvgks12LivLiyLMVFYFfCPkHbZq1a8HuvVcW23g_u0xhbn4hyKA8zry0eIAQ2B7q9o_GdpxGoQzKnyMnQB7I4xpkcvs_VdYlzOZLtian_kQBpNHrhDZciMQZJHw0BxQbxY0k0fJUMrNdpgWfaBHPI90IPlt-atjX0mJck1hfY62eRjPs8eKQNRGS9Hg7Rng4q5MLbAGis556B4AVs_A-LlKZnm1-maz2nz-1QqZp5VVL8Em');">
+                                </div>
+                            </div>
+                            <div
+                                class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gold text-black text-sm font-bold px-3 py-0.5 rounded-full shadow-neon-gold border border-white/20">
+                                #1
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <p class="text-white font-bold text-base truncate w-full">CyberRunner</p>
+                            <p class="text-gold text-sm font-bold">12,500 🏆</p>
+                        </div>
+                    </div>
+                    <!-- Rank 3 -->
+                    <div class="flex flex-col items-center gap-2 w-1/3 order-3 relative z-10">
+                        <div class="relative group">
+                            <div
+                                class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-bronze shadow-neon-bronze p-1 bg-background-dark overflow-hidden">
+                                <div class="w-full h-full rounded-full bg-cover bg-center"
+                                    data-alt="Portrait of the third place runner"
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAmvEKfbzLbLHk7guHnwDzCQLcChs0MFqQuCEHNlSNlE7YRWzSve8B_VA0bG1jyWU53KBSi4DYBSEeY_8pC0h9b6obZeOrF_mf4dEaYe98bScMAJh801HTb4Wq9uLM5QwT7u2uw28e0lb8nKTRYaeo-AmpqMZG_hAdT4Ir-hDY3wEQqvscZM4ViwL7V5vEn1ANAelz9nLMiyErfwb61jGmUxCYOTTTld8mwe4aMdBjoi62ndV9h-dUinTARa2FwZxvL2tke0PqsFlTT');">
+                                </div>
+                            </div>
+                            <div
+                                class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-bronze text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-neon-bronze">
+                                #3
+                            </div>
+                        </div>
+                        <div class="text-center mt-2">
+                            <p class="text-white font-bold text-sm truncate w-full">SpeedX</p>
+                            <p class="text-bronze text-xs font-medium">10,800 🏆</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- List Header -->
+            <div
+                class="w-full max-w-md px-4 pb-2 sticky top-[72px] z-30 bg-background-dark/95 backdrop-blur shadow-lg border-b border-white/5 pt-2">
+                <div class="flex justify-between items-end">
+                    <h3 class="text-white/60 text-xs font-bold uppercase tracking-wider pl-4">Rest of the Pack</h3>
+                    <span class="text-primary text-xs font-medium pr-4">Updated 5m ago</span>
+                </div>
+            </div>
+            <!-- Scrollable List -->
+            <div class="w-full max-w-md flex flex-col gap-3 px-4 pt-4">
+                <!-- Rank 4 -->
+                <div
+                    class="relative group flex items-center gap-4 bg-card-dark border border-white/5 p-3 rounded-xl hover:border-primary/50 transition-colors">
+                    <span class="text-white/50 text-lg font-bold w-6 text-center font-mono">04</span>
+                    <div class="relative shrink-0">
+                        <div class="w-12 h-12 rounded-full border border-primary/50 shadow-neon-primary bg-cover bg-center"
+                            data-alt="Runner SarahSprint portrait"
+                            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAAfGe938Acrlr0ZZ9iuEe9RvdFn0Tx4FrJO-TSkPaV9McbCUpI7L2lTOda-YqLyN-Y5CrxfX5rnflvebVG-FP3LiYKXp3wUuA3bND42wfR-4j1h0b_80MWEPqmkToGQyNSFZPzCjNfX2-uXdFM7BWDr-xCuNlgabO2PvKA7RCgrNlT3hX1rNHmkEWCmWjlStDUhaYfWoSY5kS9xO0tkthwktICJgl1iPHz_svebL9EFnxim3D_VRQNMUxIL6aBgEwzdR-sH38HY-I1');">
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-white text-base font-bold truncate">SarahSprint</h4>
+                        <div class="flex items-center gap-1 text-primary text-xs">
+                            <span class="material-symbols-outlined text-[14px]">military_tech</span>
+                            <span>Diamond League</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-white font-bold">9,450</p>
+                        <span class="text-[10px] text-white/40 uppercase">Trophies</span>
+                    </div>
+                </div>
+                <!-- Rank 5 -->
+                <div
+                    class="relative group flex items-center gap-4 bg-card-dark border border-white/5 p-3 rounded-xl hover:border-primary/50 transition-colors">
+                    <span class="text-white/50 text-lg font-bold w-6 text-center font-mono">05</span>
+                    <div class="relative shrink-0">
+                        <div class="w-12 h-12 rounded-full border border-primary/30 bg-cover bg-center"
+                            data-alt="Runner TurboTom portrait"
+                            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD1XZkZJtX9vu8uKILmA38FmQD-zu0sdWcXVKND9jJ4XbcNfjSdYg-QHFq6e-KspbUC3m32uuQvelcecG3J-VvAxTMGuttA33admJA9JxLXvpjDbaUfmzw9JJOH1tPMYx9Bn4Vr2_3c4vUPYnBW3UH5KZwAAkB7cYZsJCRyOs0HCOwTBK7LiASdAWg8PZ6aVTx6VRkahZXyzwGdPZoGSUDzHrV5QIhuQG-NcyliVNABm9Zc5C3P7YExNKL9hQDqEO_pr6tc3g1jGFHO');">
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-white text-base font-bold truncate">TurboTom</h4>
+                        <div class="flex items-center gap-1 text-primary/80 text-xs">
+                            <span class="material-symbols-outlined text-[14px]">military_tech</span>
+                            <span>Platinum League</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-white font-bold">9,100</p>
+                        <span class="text-[10px] text-white/40 uppercase">Trophies</span>
+                    </div>
+                </div>
+                <!-- Rank 6 -->
+                <div
+                    class="relative group flex items-center gap-4 bg-card-dark border border-white/5 p-3 rounded-xl hover:border-primary/50 transition-colors">
+                    <span class="text-white/50 text-lg font-bold w-6 text-center font-mono">06</span>
+                    <div class="relative shrink-0">
+                        <div class="w-12 h-12 rounded-full border border-primary/30 bg-cover bg-center"
+                            data-alt="Runner User portrait"
+                            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC4td4g-FpLjgmZfyN4esFYIAwmREnkbnDjZQW06KvuHCJEKWIskscQtp5Hy_ckwRI5WDsfdq2V1QKidIjOhkygN3cL3FhXgp7eb-0v8C6MhKyvBL0V0B3jDOGdLinz_66u83WW1Kg15REz0WDWzrvK4wrl1E6hmoyiXm3ZfHel7_gYi7gMHQ6u9syE1ZrbmYAUmNuczeV8lwHIwP-Fp5fEXl3wkV0tdCFtQwzfMaXiYZju6B8UTMGMKEyvA8KQ3ekh_ZWdiVi_eIYS');">
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-white text-base font-bold truncate">SonicBoom</h4>
+                        <div class="flex items-center gap-1 text-primary/80 text-xs">
+                            <span class="material-symbols-outlined text-[14px]">military_tech</span>
+                            <span>Platinum League</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-white font-bold">8,850</p>
+                        <span class="text-[10px] text-white/40 uppercase">Trophies</span>
+                    </div>
+                </div>
+                <!-- Rank 7 -->
+                <div
+                    class="relative group flex items-center gap-4 bg-card-dark border border-white/5 p-3 rounded-xl hover:border-primary/50 transition-colors">
+                    <span class="text-white/50 text-lg font-bold w-6 text-center font-mono">07</span>
+                    <div class="relative shrink-0">
+                        <div class="w-12 h-12 rounded-full border border-primary/30 bg-cover bg-center"
+                            data-alt="Runner User portrait"
+                            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDTfz0DU744a2koVNeAbP4kTJ9Q3dRxIRe9u_7V_V1sDdLFewAYZlP76dd9MgyKtUub6JD5GwbZC2uWqaF_9pV8gDb3e6fo0M1qY3v1pT_FYqEdMClQunOTBgyb9RJlWr2DUdCJov4W1M1zFUgPWCs1GMZLGGUQBHlbFsbdgb46RFzcLz0bXfKLHlOZBpIL18JEdlf_iEwZ7nezA8EeCiVCeUlK9XyxCPBYnIiz7CS8FddilmyPEp8homSEnjWs6EBPnJQx5kann3ij');">
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-white text-base font-bold truncate">ShadowRun</h4>
+                        <div class="flex items-center gap-1 text-primary/80 text-xs">
+                            <span class="material-symbols-outlined text-[14px]">military_tech</span>
+                            <span>Gold League</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-white font-bold">8,200</p>
+                        <span class="text-[10px] text-white/40 uppercase">Trophies</span>
+                    </div>
+                </div>
+                <!-- Rank 8 -->
+                <div
+                    class="relative group flex items-center gap-4 bg-card-dark border border-white/5 p-3 rounded-xl hover:border-primary/50 transition-colors">
+                    <span class="text-white/50 text-lg font-bold w-6 text-center font-mono">08</span>
+                    <div class="relative shrink-0">
+                        <div class="w-12 h-12 rounded-full border border-primary/30 bg-cover bg-center"
+                            data-alt="Runner User portrait"
+                            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC7O5CMVJqz26pTKnPpEFR3pwZQ1iEsH5B6caLYs9DXKMhZF4loy886fA7MYNP7Hsb6A4ENtkXjuHVJXKTGKO85whn1huTaI1iOZM0krf5iMGaClFmp-R2-EOnHptuxQTsW5kjLxuChxN4TCmKaYcm-EbkLtWwv91Z6KweFnp6XdJufDb99We0YCRTvCpayZX2DKFf0_hkJIsF3CASnQG4_6fzXAjSFepuoCoOagy3KKR9BUQmIjJMxSjpYxMwkeZn7oeSwMk3Z4jJt');">
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-white text-base font-bold truncate">VelocityV</h4>
+                        <div class="flex items-center gap-1 text-primary/80 text-xs">
+                            <span class="material-symbols-outlined text-[14px]">military_tech</span>
+                            <span>Gold League</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-white font-bold">7,950</p>
+                        <span class="text-[10px] text-white/40 uppercase">Trophies</span>
+                    </div>
+                </div>
+                <div class="h-20"></div> <!-- Spacer for content -->
+            </div>
+        </main>
+        <!-- Sticky My Rank -->
+        <div class="fixed bottom-[76px] w-full px-4 max-w-md left-1/2 -translate-x-1/2 z-40">
+            <div
+                class="bg-primary/10 backdrop-blur-md border border-primary/50 rounded-xl p-3 flex items-center gap-4 shadow-[0_0_20px_rgba(13,204,242,0.15)]">
+                <span class="text-primary text-lg font-bold w-6 text-center font-mono">42</span>
+                <div class="relative shrink-0">
+                    <div class="w-10 h-10 rounded-full border border-primary bg-cover bg-center"
+                        data-alt="Your profile picture"
+                        style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAuUfb7k1N6TD_tWnuA0LDJtGBW8NnreVUOUVhkIatYzo_GE9Obx898se37vJn8OcRm-j10XZlqqh4psR4YCzQ7ybL5gfph6JKcBAtc1Ubx0_XMmfeBddYNptepdt818s-3Z_YqibJIfmnpRgKTVhoGiGKCBhAlr4OUa9dIEMjCQGGaNHkkVkaaYeu_OppjMTgJNQLiMK1Uih3zZ3UMH3LgO0cfFkL8N2NByxhqSThJsVaEhnBs20K1bz2E3xVqbs1x85NbZGuDrsDM');">
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-white text-sm font-bold truncate">You</h4>
+                    <p class="text-white/60 text-xs">Silver League</p>
+                </div>
+                <div class="flex items-center gap-1 bg-primary/20 px-3 py-1.5 rounded-full">
+                    <span class="material-symbols-outlined text-primary text-[16px] animate-pulse">emoji_events</span>
+                    <p class="text-white text-sm font-bold">4,520</p>
+                </div>
+            </div>
+        </div>
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 w-full bg-[#050b14]/90 backdrop-blur-lg border-t border-white/5 z-50 pb-safe pt-2">
+            <div class="flex justify-around items-center px-4 pb-4">
+                <button
+                    class="flex flex-col items-center gap-1 p-2 text-white/40 hover:text-white transition-colors group">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">home</span>
+                    <span class="text-[10px] font-medium">Home</span>
+                </button>
+                <button
+                    class="flex flex-col items-center gap-1 p-2 text-white/40 hover:text-white transition-colors group">
+                    <span
+                        class="material-symbols-outlined group-hover:scale-110 transition-transform">directions_run</span>
+                    <span class="text-[10px] font-medium">Run</span>
+                </button>
+                <div class="relative flex flex-col items-center gap-1 p-2 text-primary">
+                    <!-- Glow effect behind active icon -->
+                    <div class="absolute top-1 w-8 h-8 bg-primary/20 blur-lg rounded-full"></div>
+                    <span class="material-symbols-outlined fill-current relative z-10">leaderboard</span>
+                    <span class="text-[10px] font-bold relative z-10">Rank</span>
+                </div>
+                <button
+                    class="flex flex-col items-center gap-1 p-2 text-white/40 hover:text-white transition-colors group">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">person</span>
+                    <span class="text-[10px] font-medium">Profile</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+</body>
+
+</html>

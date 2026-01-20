@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Domrun - App de corrida com conquista de territórios, PvP e gamificação geográfica.">
+    <meta name="keywords"
+        content="domrun, fitness, gamificação, GPS, corrida, caminhada, mapas, territórios, PvP, ligas">
+    <title>Domrun - Domine o Mapa, Supere Limites</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #07070b;
+            --bg-soft: #0d0d14;
+            --card: rgba(255, 255, 255, 0.06);
+            --card-strong: rgba(255, 255, 255, 0.12);
+            --text: #ffffff;
+            --muted: #b8b8c7;
+            --primary: #7b2cbf;
+            --secondary: #9d4edd;
+            --accent: #c77dff;
+            --gradient: linear-gradient(135deg, #7b2cbf 0%, #9d4edd 45%, #c77dff 100%);
+            --glow: 0 0 40px rgba(123, 44, 191, 0.35);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            backdrop-filter: blur(16px);
+            background: rgba(7, 7, 11, 0.6);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .brand img {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            box-shadow: var(--glow);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at 20% 20%, rgba(123, 44, 191, 0.25), transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(199, 125, 255, 0.18), transparent 40%),
+                var(--bg);
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 48px;
+            align-items: center;
+            padding-top: 120px;
+            padding-bottom: 80px;
+        }
+
+        .hero-title {
+            font-size: clamp(2.6rem, 4vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -1px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--muted);
+            margin-top: 16px;
+            max-width: 580px;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 16px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 28px;
+            border-radius: 999px;
+            font-weight: 700;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .button-primary {
+            background: var(--gradient);
+            box-shadow: var(--glow);
+        }
+
+        .button-secondary {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+        }
+
+        .hero-card {
+            background: var(--card);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .hero-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(123, 44, 191, 0.2), transparent 60%);
+            opacity: 0.7;
+        }
+
+        .hero-card-content {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            gap: 20px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(123, 44, 191, 0.18);
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(123, 44, 191, 0.4);
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 1.4rem;
+        }
+
+        .stat span {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .floating-orb {
+            position: absolute;
+            border-radius: 999px;
+            filter: blur(0px);
+            opacity: 0.7;
+            mix-blend-mode: screen;
+            animation: float 14s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 240px;
+            height: 240px;
+            background: rgba(123, 44, 191, 0.5);
+            top: 10%;
+            left: -60px;
+        }
+
+        .orb-2 {
+            width: 180px;
+            height: 180px;
+            background: rgba(199, 125, 255, 0.4);
+            bottom: 12%;
+            right: -40px;
+            animation-delay: 2s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-24px);
+            }
+        }
+
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 3.2vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            color: var(--muted);
+            max-width: 720px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+
+        .glass-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.25s ease, border 0.25s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(199, 125, 255, 0.6);
+        }
+
+        .detail-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 28px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+
+        .detail-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: grid;
+            gap: 12px;
+        }
+
+        .detail-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-list {
+            list-style: none;
+            display: grid;
+            gap: 8px;
+        }
+
+        .detail-list li {
+            color: var(--muted);
+            position: relative;
+            padding-left: 18px;
+        }
+
+        .detail-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        .icon-badge {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 16px;
+            background: rgba(123, 44, 191, 0.2);
+            margin-bottom: 12px;
+            font-size: 22px;
+        }
+
+        .steps {
+            display: grid;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .step {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: var(--gradient);
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+        }
+
+        .battle-strip {
+            margin-top: 24px;
+            background: rgba(123, 44, 191, 0.2);
+            border-radius: 16px;
+            padding: 18px;
+            border: 1px solid rgba(123, 44, 191, 0.5);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .battle-strip span {
+            font-weight: 600;
+        }
+
+        .comparison {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            margin-top: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--muted);
+        }
+
+        th {
+            color: var(--text);
+            background: rgba(123, 44, 191, 0.2);
+        }
+
+        .highlight {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .cta {
+            background: var(--gradient);
+            border-radius: 28px;
+            padding: 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta::after {
+            content: "";
+            position: absolute;
+            inset: -50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent 60%);
+            animation: rotate 16s linear infinite;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 900;
+        }
+
+        .footer {
+            padding: 48px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--muted);
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 860px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero-card {
+                margin-top: 24px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 18px;
+            }
+
+            .nav-inner {
+                height: 64px;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .hero-grid {
+                padding-top: 110px;
+                padding-bottom: 60px;
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .button {
+                width: 100%;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .hero-card {
+                padding: 20px;
+                width: 100%;
+                margin: 0;
+            }
+
+            .hero-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .stat strong {
+                font-size: 1.2rem;
+            }
+
+            .battle-strip {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .cta {
+                padding: 40px 24px;
+            }
+
+            .section {
+                padding: 60px 0;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .step {
+                flex-direction: column;
+            }
+
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+                width: 100%;
+            }
+
+            thead {
+                display: none;
+            }
+
+            td {
+                border-bottom: none;
+                padding: 12px 16px;
+            }
+
+            .comparison tbody tr {
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                padding: 8px 0;
+            }
+
+            .hero {
+                overflow: visible;
+            }
+
+            .floating-orb {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="nav">
+        <div class="container nav-inner">
+            <div class="brand">
+                <span>Domrun</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features">Funcionalidades</a>
+                <a href="#detalhes">Detalhado</a>
+                <a href="#trofeus-ligas">Troféus e Ligas</a>
+                <a href="#anticheat">Anti-cheat</a>
+                <a href="#pvp">Batalhas</a>
+                <a href="#mapa">Mapa Vivo</a>
+                <a href="#tecnologia">Tecnologia</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero" id="topo">
+        <div class="floating-orb orb-1"></div>
+        <div class="floating-orb orb-2"></div>
+        <div class="container hero-grid">
+            <div>
+                <div class="pill">🚀 Ligas, PvP e territórios em tempo real</div>
+                <h1 class="hero-title">Domrun</h1>
+                <p class="hero-subtitle">
+                    O app que transforma corrida e caminhada em conquista geográfica. Domine territórios,
+                    enfrente jogadores em PvP e evolua em ligas enquanto melhora sua performance — em telas
+                    perfeitas tanto no web quanto no mobile.
+                </p>
+                <div class="hero-cta">
+                    <a class="button button-primary" href="#features">Explorar funcionalidades</a>
+                    <a class="button button-secondary" href="#como-funciona">Como funciona</a>
+                </div>
+            </div>
+            <div class="hero-card">
+                <div class="hero-card-content">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="icon-badge">🗺️</div>
+                        <div>
+                            <strong>Mapa vivo e competitivo</strong>
+                            <p style="color: var(--muted);">Cada percurso pinta o mapa com sua cor.</p>
+                        </div>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <strong data-counter="128">0</strong>
+                            <span>territórios conquistados</span>
+                        </div>
+                        <div class="stat">
+                            <strong data-counter="56">0</strong>
+                            <span>corridas registradas</span>
+                        </div>
+                        <div class="stat">
+                            <strong data-counter="12">0</strong>
+                            <span>ligas competitivas</span>
+                        </div>
+                    </div>
+                    <div class="battle-strip">
+                        <span>⚔️ PvP em tempo real</span>
+                        <span>🏆 Troféus e ELO dinâmico</span>
+                        <span>🛡️ Anti-cheat inteligente</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="section container fade-in" id="features">
+        <h2 class="section-title">Funcionalidades que viram jogo</h2>
+        <p class="section-subtitle">
+            Domrun combina precisão esportiva com o prazer da competição. Cada recurso foi pensado para
+            motivar, reter e tornar o treino inesquecível.
+        </p>
+        <div class="grid grid-3">
+            <div class="glass-card">
+                <div class="icon-badge">🧭</div>
+                <h3>Territórios em tempo real</h3>
+                <p style="color: var(--muted);">
+                    Capture bairros, ruas e regiões. O mapa mostra quem domina cada área em segundos.
+                </p>
+            </div>
+            <div class="glass-card">
+                <div class="icon-badge">📊</div>
+                <h3>Performance e métricas vivas</h3>
+                <p style="color: var(--muted);">
+                    Distância, pace, tempo, área conquistada, tudo na mesma tela enquanto você corre.
+                </p>
+            </div>
+            <div class="glass-card">
+                <div class="icon-badge">🎯</div>
+                <h3>Missões diárias e XP</h3>
+                <p style="color: var(--muted);">
+                    Desafios dinâmicos para manter a constância e acelerar sua evolução nas ligas.
+                </p>
+            </div>
+            <div class="glass-card">
+                <div class="icon-badge">👥</div>
+                <h3>Equipes e dominação coletiva</h3>
+                <p style="color: var(--muted);">
+                    Forme squads para conquistar cidades inteiras e proteger territórios estratégicos.
+                </p>
+            </div>
+            <div class="glass-card">
+                <div class="icon-badge">📸</div>
+                <h3>Resumo visual da corrida</h3>
+                <p style="color: var(--muted);">
+                    Registros com mapa, trajeto e estatísticas prontos para compartilhar.
+                </p>
+            </div>
+            <div class="glass-card">
+                <div class="icon-badge">🔒</div>
+                <h3>Anti-cheat e GPS inteligente</h3>
+                <p style="color: var(--muted);">
+                    Validações de ritmo, tempo mínimo e saltos GPS para manter o jogo justo.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section container fade-in" id="detalhes">
+        <h2 class="section-title">Funcionalidades explicadas ponto a ponto</h2>
+        <p class="section-subtitle">
+            Cada área do Domrun foi pensada para ficar simples de entender, com passos claros e objetivos.
+        </p>
+        <div class="detail-grid">
+            <div class="detail-card">
+                <h3>👤 Perfil</h3>
+                <ul class="detail-list">
+                    <li>Customize nome, foto e cor do seu domínio.</li>
+                    <li>Veja histórico de corridas e áreas dominadas.</li>
+                    <li>Monitore evolução de nível e estatísticas pessoais.</li>
+                </ul>
+            </div>
+            <div class="detail-card">
+                <h3>🏆 Conquistas</h3>
+                <ul class="detail-list">
+                    <li>Desafios diários e metas por distância.</li>
+                    <li>Badges visuais por sequência e progressão.</li>
+                    <li>XP extra para acelerar sua liga.</li>
+                </ul>
+            </div>
+            <div class="detail-card">
+                <h3>🏃 Corrida simples</h3>
+                <ul class="detail-list">
+                    <li>Registre corrida sem necessidade de fechar território.</li>
+                    <li>Salvar mapa, pace, tempo e distância.</li>
+                    <li>Perfeita para treinos rápidos ou reabilitação.</li>
+                </ul>
+            </div>
+            <div class="detail-card">
+                <h3>🗺️ Corrida de domínio</h3>
+                <ul class="detail-list">
+                    <li>Feche o trajeto e capture o território.</li>
+                    <li>Área conquistada é pintada com sua cor.</li>
+                    <li>Gera impacto direto no ranking e no mapa.</li>
+                </ul>
+            </div>
+            <div class="detail-card">
+                <h3>⚔️ PvP e ligas</h3>
+                <ul class="detail-list">
+                    <li>Entre na fila e encontre rivais do seu nível.</li>
+                    <li>Battle Score calcula distância + pace.</li>
+                    <li>Ganho/perda de troféus com ELO dinâmico.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section container fade-in" id="como-funciona">
+        <h2 class="section-title">Como funciona na prática</h2>
+        <p class="section-subtitle">
+            Aqui está o passo a passo real do app: o que acontece quando você inicia uma corrida
+            e quando entra em uma batalha PvP.
+        </p>
+        <div class="detail-grid">
+            <div class="detail-card">
+                <h3>🏃 Corridas (simples e domínio)</h3>
+                <ul class="detail-list">
+                    <li>Você inicia a corrida e o GPS começa a registrar seu trajeto.</li>
+                    <li>O app calcula distância, pace e tempo em tempo real.</li>
+                    <li>Se for corrida simples, ela é salva com mapa e estatísticas.</li>
+                    <li>Se você fechar um percurso, a corrida vira corrida de domínio.</li>
+                    <li>Na corrida de domínio, a área é pintada com sua cor no mapa.</li>
+                </ul>
+            </div>
+            <div class="detail-card">
+                <h3>⚔️ Batalhas PvP</h3>
+                <ul class="detail-list">
+                    <li>Você entra na fila e o sistema procura um rival do seu nível.</li>
+                    <li>Quando o match acontece, a batalha começa (tempo ou distância).</li>
+                    <li>Você corre normalmente e o app registra a performance.</li>
+                    <li>Ao finalizar, o Battle Score compara distância + pace.</li>
+                    <li>O vencedor ganha troféus e pode subir de liga.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section container fade-in" id="pvp">
+        <h2 class="section-title">Batalhas PvP e Ligas</h2>
+        <p class="section-subtitle">
+            Desafie adversários em partidas por tempo ou distância. Compare Battle Score, ganhe troféus
+            e mantenha sua posição nas ligas.
+        </p>
+        <div class="grid grid-3">
+            <div class="glass-card">
+                <div class="icon-badge">⚔️</div>
+                <h3>Matchmaking inteligente</h3>
+                <p style="color: var(--muted);">
+                    Encontre oponentes com nível semelhante para batalhas equilibradas.
+                </p>
+            </div>
+            <div class="glass-card">
+                <div class="icon-badge">🏅</div>
+                <h3>Battle Score</h3>
+                <p style="color: var(--muted);">
+                    Pontuação baseada em distância e pace para premiar performance real.
+                </p>
+            </div>
+            <div class="glass-card">
+                <div class="icon-badge">🥇</div>
+                <h3>Troféus e ELO</h3>
+                <p style="color: var(--muted);">
+                    Ganhe e perca troféus com base na diferença de habilidade.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section container fade-in" id="trofeus-ligas">
+        <h2 class="section-title">Troféus e Ligas: como funciona</h2>
+        <p class="section-subtitle">
+            O sistema de troféus é o que define sua liga e seu nível competitivo. Ele é simples de entender
+            e sempre recompensador.
+        </p>
+        <div class="detail-grid">
+            <div class="detail-card">
+                <h3>🏆 Ganho de troféus</h3>
+                <ul class="detail-list">
+                    <li>Vitória base: +25 troféus.</li>
+                    <li>Se vencer alguém com mais troféus, ganha mais.</li>
+                    <li>Se vencer alguém com menos, ganha menos.</li>
+                </ul>
+            </div>
+            <div class="detail-card">
+                <h3>📉 Perda de troféus</h3>
+                <ul class="detail-list">
+                    <li>Derrota base: -15 troféus.</li>
+                    <li>Se perder para alguém com menos, perde mais.</li>
+                    <li>Se perder para alguém com mais, perde menos.</li>
+                </ul>
+            </div>
+            <div class="detail-card">
+                <h3>🥇 Ligas competitivas</h3>
+                <ul class="detail-list">
+                    <li>Bronze, Prata, Ouro, Cristal e Mestre.</li>
+                    <li>Suba de liga conforme seus troféus crescem.</li>
+                    <li>Multiplicador de XP aumenta em ligas mais altas.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section container fade-in" id="anticheat">
+        <h2 class="section-title">Anti-cheat explicado de forma simples</h2>
+        <p class="section-subtitle">
+            O Domrun protege as batalhas e o mapa de trapaças. Quando algo foge do padrão humano,
+            a corrida é marcada como inválida.
+        </p>
+        <div class="detail-grid">
+            <div class="detail-card">
+                <h3>⚡ Velocidade humana</h3>
+                <ul class="detail-list">
+                    <li>Pace muito rápido (ex: abaixo de 2:30 min/km) é sinal suspeito.</li>
+                    <li>Corrida continua registrada, mas sem ganho de troféus.</li>
+                </ul>
+            </div>
+            <div class="detail-card">
+                <h3>📍 Saltos de GPS</h3>
+                <ul class="detail-list">
+                    <li>Distância acima de 100m em poucos segundos detecta Fake GPS.</li>
+                    <li>Trajeto fica inválido para evitar domínio injusto.</li>
+                </ul>
+            </div>
+            <div class="detail-card">
+                <h3>⏱️ Tempo mínimo</h3>
+                <ul class="detail-list">
+                    <li>Corridas muito curtas não geram troféus.</li>
+                    <li>Evita abuso com capturas rápidas ou falsas.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section container fade-in" id="mapa">
+        <h2 class="section-title">Mapa vivo e estratégico</h2>
+        <p class="section-subtitle">
+            O mapa é o tabuleiro. Veja territórios dominados, áreas em disputa e
+            regiões que precisam de defesa.
+        </p>
+        <div class="comparison">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Domrun</th>
+                        <th>Apps tradicionais</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="highlight">Mapa interativo com territórios em tempo real</td>
+                        <td>Resumo estático da corrida</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">Conquista geográfica e defesa de áreas</td>
+                        <td>Medalhas e metas individuais</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">PvP, ligas e equipe</td>
+                        <td>Comparações isoladas</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section container fade-in" id="tecnologia">
+        <h2 class="section-title">Tecnologia de ponta</h2>
+        <p class="section-subtitle">
+            Performance nativa, mapas de alta fidelidade e backend geoespacial para garantir precisão absoluta.
+        </p>
+        <div class="grid grid-3">
+            <div class="glass-card">
+                <div class="icon-badge">📱</div>
+                <h3>Flutter</h3>
+                <p style="color: var(--muted);">Experiência fluida e responsiva no Android e iOS.</p>
+            </div>
+            <div class="glass-card">
+                <div class="icon-badge">🗺️</div>
+                <h3>Mapbox</h3>
+                <p style="color: var(--muted);">Mapas ricos, estilizados e com performance real-time.</p>
+            </div>
+            <div class="glass-card">
+                <div class="icon-badge">🗄️</div>
+                <h3>PostGIS</h3>
+                <p style="color: var(--muted);">Cálculos espaciais avançados e queries geográficas precisas.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section container fade-in" id="cta">
+        <div class="cta">
+            <div class="cta-content">
+                <h2 class="cta-title">Pronto para dominar o mapa?</h2>
+                <p style="margin-top: 12px; color: rgba(255, 255, 255, 0.9);">
+                    Transforme treino em conquista, e cada quilômetro em território. Domrun é corrida com propósito.
+                </p>
+                <div class="hero-cta" style="justify-content: center;">
+                    <a class="button button-secondary" href="#topo">Voltar ao topo</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p><strong>Domrun</strong> — Domine o mapa, supere limites.</p>
+            <p style="margin-top: 8px;">
+                Conquista territorial, PvP, ligas e gamificação de verdade para transformar sua rotina.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.12
+        });
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(anchor.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        const counters = document.querySelectorAll('[data-counter]');
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                const el = entry.target;
+                const target = Number(el.dataset.counter);
+                let current = 0;
+                const step = Math.max(1, Math.ceil(target / 60));
+                const tick = () => {
+                    current += step;
+                    if (current >= target) {
+                        el.textContent = target;
+                    } else {
+                        el.textContent = current;
+                        requestAnimationFrame(tick);
+                    }
+                };
+                tick();
+                counterObserver.unobserve(el);
+            });
+        }, { threshold: 0.6 });
+
+        counters.forEach(counter => counterObserver.observe(counter));
+    </script>
+</body>
+
+</html>

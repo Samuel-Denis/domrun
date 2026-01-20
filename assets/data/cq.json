@@ -1,0 +1,225 @@
+[
+    {
+        "id": "01",
+        "category": "Explorador",
+        "conquistas": [
+            {
+                "id": "EX-01",
+                "name": "Forasteiro",
+                "description": "Capture seu primeiro território no mapa.",
+                "medal": "bronze",
+                "xp_reward": 100,
+                "goal_type": "territory_count",
+                "goal_value": 1,
+                "category": "explorer"
+            },
+            {
+                "id": "EX-02",
+                "name": "Socializador",
+                "description": "Convidar 10 amigo para o app.",
+                "medal": "gold",
+                "xp_reward": 1000,
+                "goal_type": "invite_count",
+                "goal_value": 10,
+                "category": "explorer"
+            },
+            {
+                "id": "EX-03",
+                "name": "Alistamento",
+                "description": "Junte-se a uma equipe.",
+                "medal": "bronze",
+                "xp_reward": 100,
+                "goal_type": "team_count",
+                "goal_value": 1,
+                "category": "explorer"
+            },
+            {
+                "id": "EX-04",
+                "name": "Rumo a glória",
+                "description": "Dominar 5 territórios diferentes em um único dia.",
+                "medal": "silver",
+                "xp_reward": 200,
+                "goal_type": "territory_count",
+                "goal_value": 5,
+                "category": "explorer"
+            },
+            {
+                "id": "EX-05",
+                "name": "Expansão de dominio",
+                "description": "Dominar um total de 10.000 m² de área.",
+                "medal": "silver",
+                "xp_reward": 200,
+                "goal_type": "area_count",
+                "goal_value": 10000,
+                "category": "explorer"
+            },
+            {
+                "id": "EX-06",
+                "name": "Cartógrafo Real",
+                "description": "Descobrir e capturar territórios em 3 bairros diferentes da cidade.",
+                "medal": "silver",
+                "xp_reward": 200,
+                "goal_type": "territory_count",
+                "goal_value": 3,
+                "category": "explorer"
+            },
+            {
+                "id": "EX-07",
+                "name": "Coruja Noturna",
+                "description": "Completar uma captura de território antes das 7h da manhã.",
+                "medal": "gold",
+                "xp_reward": 300,
+                "goal_type": "time",
+                "goal_value": "07:00:00",
+                "category": "explorer"
+            },
+            {
+                "id": "EX-08",
+                "name": "Conquistador",
+                "description": "Conquistar um total de 10 territórios.",
+                "medal": "gold",
+                "xp_reward": 300,
+                "goal_type": "territory_count",
+                "goal_value": 10,
+                "category": "explorer"
+            },
+            {
+                "id": "EX-09",
+                "name": "Dominador",
+                "description": "Domine um total de 5 territórios de outros usuários.",
+                "medal": "silver",
+                "xp_reward": 200,
+                "goal_type": "territory_count",
+                "goal_value": 5,
+                "category": "explorer"
+            },
+            {
+                "id": "EX-10",
+                "name": "Imperador",
+                "description": "Tenha no total de territorios de 10km².",
+                "medal": "silver",
+                "xp_reward": 200,
+                "goal_type": "area_count",
+                "goal_value": 10000,
+                "category": "explorer"
+            }
+        ]
+    },
+    {
+        "id": "02",
+        "category": "Atleta",
+        "conquistas": [
+            {
+                "id": "AT-01",
+                "name": "Velocista Urbano",
+                "description": "Manter um ritmo (pace) abaixo de 5:00 min/km por pelo menos 1km.",
+                "medal": "silver",
+                "xp_reward": 200,
+                "goal_type": "pace",
+                "goal_value": 300,
+                "category": "athlete"
+            },
+            {
+                "id": "AT-02",
+                "name": "Maratonista de Bairro",
+                "description": "Correr um total acumulado de 42km.",
+                "medal": "gold",
+                "xp_reward": 500,
+                "goal_type": "distance_accumulated",
+                "goal_value": 42000,
+                "category": "athlete"
+            },
+            {
+                "id": "AT-03",
+                "name": "Resistência Blindada",
+                "description": "Completar uma única sessão de domínio de 1 hora ou mais.",
+                "medal": "silver",
+                "xp_reward": 250,
+                "goal_type": "duration",
+                "goal_value": 3600,
+                "category": "athlete"
+            },
+            {
+                "id": "AT-04",
+                "name": "Corredor experiente",
+                "description": "Correr um total acumulado de 100km.",
+                "medal": "gold",
+                "xp_reward": 500,
+                "goal_type": "distance_accumulated",
+                "goal_value": 100000,
+                "category": "athlete"
+            }
+        ]
+    },
+    {
+        "id": "03",
+        "category": "Estrategista",
+        "conquistas": [
+            {
+                "id": "ST-01",
+                "name": "Muralha Humana",
+                "description": "Manter a posse de um território por 7 dias consecutivos.",
+                "medal": "silver",
+                "xp_reward": 250,
+                "goal_type": "defense_days",
+                "goal_value": 7,
+                "category": "strategist"
+            },
+            {
+                "id": "ST-02",
+                "name": "Vingança Instantânea",
+                "description": "Recuperar um território perdido em menos de 24 horas.",
+                "medal": "gold",
+                "xp_reward": 400,
+                "goal_type": "retake_time",
+                "goal_value": 86400,
+                "category": "strategist"
+            },
+            {
+                "id": "ST-03",
+                "name": "Cerco Tático",
+                "description": "Fechar um novo domínio que faça fronteira com 3 territórios rivais.",
+                "medal": "gold",
+                "xp_reward": 450,
+                "goal_type": "border_rivals",
+                "goal_value": 3,
+                "category": "strategist"
+            }
+        ]
+    },
+    {
+        "category": "Lendário",
+        "conquistas": [
+            {
+                "id": "LG-01",
+                "name": "Soberano",
+                "description": "Alcançar o nível 20 de conta.",
+                "medal": "gold",
+                "xp_reward": 1000,
+                "goal_type": "level",
+                "goal_value": 20,
+                "category": "legendary"
+            },
+            {
+                "id": "LG-02",
+                "name": "Patrulha Inabalável",
+                "description": "Abrir o app e registrar movimento por 5 dias seguidos.",
+                "medal": "silver",
+                "xp_reward": 300,
+                "goal_type": "daily_streak",
+                "goal_value": 5,
+                "category": "legendary"
+            },
+            {
+                "id": "LG-03",
+                "name": "Lobo Solitário",
+                "description": "Capturar um território em um dia de chuva ou clima adverso.",
+                "medal": "gold",
+                "xp_reward": 500,
+                "goal_type": "weather_condition",
+                "goal_value": "rain",
+                "category": "legendary"
+            }
+        ]
+    }
+]
