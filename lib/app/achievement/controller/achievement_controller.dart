@@ -1,13 +1,9 @@
-import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-
 import 'package:nur_app/app/achievement/models/achievement_model.dart';
-import 'package:nur_app/app/auth/service/auth_service.dart';
-import 'package:nur_app/core/constants/api_constants.dart';
+import 'package:nur_app/app/achievement/service/achievement_api_service.dart';
 
 class AchievementsController extends GetxController {
-  late final AuthService _authService;
+  late final AchievementApiService _apiService;
 
   final isLoading = false.obs;
   final isClaiming = <String, bool>{}.obs;
@@ -22,7 +18,7 @@ class AchievementsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _authService = Get.find<AuthService>();
+    _apiService = Get.find<AchievementApiService>();
     fetchAchievements();
   }
 
@@ -31,26 +27,7 @@ class AchievementsController extends GetxController {
     errorMessage.value = null;
 
     try {
-      final token = _authService.getAccessToken();
-      final res = await http.get(
-        Uri.parse(
-          '${ApiConstants.baseUrl}${ApiConstants.achievementsEndpoint}',
-        ),
-        headers: {
-          'Accept': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (res.statusCode < 200 || res.statusCode >= 300) {
-        throw Exception('HTTP ${res.statusCode}: ${res.body}');
-      }
-
-      final decoded = jsonDecode(res.body);
-      final List list = (decoded is Map && decoded['achievements'] is List)
-          ? decoded['achievements'] as List
-          : <dynamic>[];
-
+      final list = await _apiService.fetchAchievements();
       achievements.value = list
           .map((e) => AchievementModel.fromJson(e as Map<String, dynamic>))
           .where(
@@ -71,20 +48,7 @@ class AchievementsController extends GetxController {
 
     isClaiming[a.code] = true;
     try {
-      final token = _authService.getAccessToken();
-      final res = await http.post(
-        Uri.parse(
-          '${ApiConstants.baseUrl}${ApiConstants.achievementsEndpoint}/${a.code}/claim',
-        ),
-        headers: {
-          'Accept': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (res.statusCode < 200 || res.statusCode >= 300) {
-        throw Exception('HTTP ${res.statusCode}: ${res.body}');
-      }
+      await _apiService.claimAchievement(a.code);
 
       // Atualiza local (CLAIMED)
       final idx = achievements.indexWhere((x) => x.code == a.code);

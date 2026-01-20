@@ -1,15 +1,14 @@
-import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:nur_app/app/profile/models/public_user_profile.dart';
 import 'package:nur_app/app/profile/service/public_profile_service.dart';
-import 'package:nur_app/core/constants/api_constants.dart';
+import 'package:nur_app/app/maps/service/geocoding_service.dart';
 
 /// Controller para perfil público de outro usuário
 class PublicProfileController extends GetxController {
   final PublicProfileService _service;
+  final MapboxGeocodingService _geocodingService;
 
-  PublicProfileController(this._service);
+  PublicProfileController(this._service, this._geocodingService);
 
   final Rxn<PublicUserProfile> user = Rxn<PublicUserProfile>();
   final RxBool isLoading = false.obs;
@@ -85,28 +84,9 @@ class PublicProfileController extends GetxController {
     required double latitude,
     required double longitude,
   }) async {
-    try {
-      final token = ApiConstants.mapboxAccessToken;
-      final url =
-          'https://api.mapbox.com/geocoding/v5/mapbox.places/$longitude,$latitude.json?types=place&access_token=$token';
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode != 200) return null;
-
-      final data = json.decode(response.body) as Map<String, dynamic>;
-      final features = data['features'] as List? ?? [];
-      if (features.isEmpty) return null;
-
-      final placeFeature = features.firstWhere(
-        (feature) {
-          final types = (feature as Map<String, dynamic>)['place_type'] as List?;
-          return types?.contains('place') == true;
-        },
-        orElse: () => features.first as Map<String, dynamic>,
-      ) as Map<String, dynamic>;
-
-      return placeFeature['text'] as String?;
-    } catch (_) {
-      return null;
-    }
+    return _geocodingService.reverseGeocodeCity(
+      latitude: latitude,
+      longitude: longitude,
+    );
   }
 }

@@ -1,18 +1,19 @@
-import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:nur_app/app/auth/models/user_model.dart';
-import 'package:nur_app/app/profile/models/achievement_model.dart';
+import 'package:nur_app/app/achievement/local/models/achievement_model.dart';
 import 'package:nur_app/app/profile/models/run_post_model.dart';
+import 'package:nur_app/app/profile/service/profile_service.dart';
 import 'package:nur_app/app/user/service/user_service.dart';
 import 'package:nur_app/core/constants/api_constants.dart';
 import 'package:nur_app/app/profile/models/user_stats_model.dart';
-import 'package:nur_app/app/profile/service/achievement_service.dart';
+import 'package:nur_app/app/achievement/local/service/achievement_service.dart';
 import 'package:nur_app/core/services/storage_service.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:nur_app/app/maps/models/run_model.dart';
+import 'package:nur_app/app/maps/service/geocoding_service.dart';
+import 'package:nur_app/app/maps/service/mapbox_static_image_service.dart';
 import 'package:image/image.dart' as img;
 import 'dart:ui' as ui;
 import 'dart:math' as math;
@@ -24,6 +25,9 @@ import 'package:flutter_svg/svg.dart' as svg;
 class ProfileController extends GetxController {
   late final StorageService _storage;
   late final UserService _userService;
+  late final ProfileService _profileService;
+  late final MapboxGeocodingService _geocodingService;
+  late final MapboxStaticImageService _mapboxStaticImageService;
 
   // Variáveis reativas para os dados do perfil
   final Rx<UserModel?> user = Rx<UserModel?>(null);
@@ -49,6 +53,9 @@ class ProfileController extends GetxController {
     super.onInit();
     _storage = Get.find<StorageService>();
     _userService = Get.find<UserService>();
+    _profileService = Get.find<ProfileService>();
+    _geocodingService = Get.find<MapboxGeocodingService>();
+    _mapboxStaticImageService = Get.find<MapboxStaticImageService>();
     // Busca dados quando o controller é inicializado
     loadProfileData();
   }
@@ -109,17 +116,8 @@ class ProfileController extends GetxController {
       }
 
       // Busca dados completos do perfil
-      final response = await http.get(
-        Uri.parse('${ApiConstants.baseUrl}/users/profile/complete'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        final userData = (data['user'] as Map<String, dynamic>?) ?? data;
+      final data = await _profileService.getCompleteProfile();
+      final userData = (data['user'] as Map<String, dynamic>?) ?? data;
 
         final userMap = Map<String, dynamic>.from(userData);
         userMap.remove('password');
@@ -176,7 +174,6 @@ class ProfileController extends GetxController {
         }
 
         await _loadAchievements();
-      }
     } catch (e) {
       error.value = e.toString();
       print('Erro ao carregar dados do perfil: $e');
@@ -254,12 +251,10 @@ class ProfileController extends GetxController {
       attempts++;
     }
 
-    final response = await http
-        .get(Uri.parse(url))
-        .timeout(const Duration(seconds: 10));
-    if (response.statusCode != 200) return null;
+    final bytes = await _mapboxStaticImageService.fetchImageBytes(url);
+    if (bytes == null) return null;
 
-    final image = img.decodeImage(response.bodyBytes);
+    final image = img.decodeImage(bytes);
     if (image == null) return null;
     final uiImage = await _convertImageToUiImage(image);
     if (uiImage == null) return null;
@@ -754,19 +749,6 @@ class ProfileController extends GetxController {
     }
   }
 
-  /// Atualiza conquistas relacionadas ao nível do usuário
-  Future<void> _updateAchievementsForLevel(int level) async {
-    try {
-      if (Get.isRegistered<AchievementService>()) {
-        final achievementService = Get.find<AchievementService>();
-        await achievementService.checkAndUpdateAchievements(level: level);
-        print('✅ Conquistas atualizadas para nível $level');
-      }
-    } catch (e) {
-      print('❌ Erro ao atualizar conquistas para nível: $e');
-    }
-  }
-
   /// Atualiza conquistas relacionadas a corridas
   Future<void> _updateAchievementsForRuns(List<RunPostModel> runs) async {
     try {
@@ -838,29 +820,10 @@ class ProfileController extends GetxController {
     required double latitude,
     required double longitude,
   }) async {
-    try {
-      final token = ApiConstants.mapboxAccessToken;
-      final url =
-          'https://api.mapbox.com/geocoding/v5/mapbox.places/$longitude,$latitude.json?types=place&access_token=$token';
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode != 200) return null;
-
-      final data = json.decode(response.body) as Map<String, dynamic>;
-      final features = data['features'] as List? ?? [];
-      if (features.isEmpty) return null;
-
-      final placeFeature =
-          features.firstWhere((feature) {
-                final types =
-                    (feature as Map<String, dynamic>)['place_type'] as List?;
-                return types?.contains('place') == true;
-              }, orElse: () => features.first as Map<String, dynamic>)
-              as Map<String, dynamic>;
-
-      return placeFeature['text'] as String?;
-    } catch (_) {
-      return null;
-    }
+    return _geocodingService.reverseGeocodeCity(
+      latitude: latitude,
+      longitude: longitude,
+    );
   }
 
   /// Recarrega os dados do perfil

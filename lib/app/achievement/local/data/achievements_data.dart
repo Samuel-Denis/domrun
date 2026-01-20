@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
-import 'package:nur_app/app/profile/models/achievement_definition.dart';
+import 'package:nur_app/app/achievement/local/models/achievement_definition.dart';
 
 /// Dados estáticos de todas as conquistas disponíveis no app
 /// Baseado no arquivo cq.json - compilado junto com o app
@@ -78,20 +78,5 @@ class AchievementsData {
     return all
         .where((achievement) => achievement.category == category)
         .toList();
-  }
-
-  /// Retorna uma conquista por ID
-  static Future<AchievementDefinition?> getById(String id) async {
-    try {
-      final all = await getAllAchievements();
-      return all.firstWhere((achievement) => achievement.id == id);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Limpa o cache (útil para testes ou quando o JSON for atualizado)
-  static void clearCache() {
-    _cachedAchievements = null;
   }
 }

@@ -46,6 +46,7 @@ class BattleController extends GetxController {
     super.onInit();
     _battleService = Get.find<BattleService>();
     _authService = Get.find<AuthService>();
+    _userService = Get.find<UserService>();
   }
 
   @override

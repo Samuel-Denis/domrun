@@ -1,7 +1,6 @@
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 
 import 'package:flutter/material.dart';
@@ -16,10 +15,13 @@ import 'package:nur_app/app/maps/models/run_model.dart';
 import 'package:nur_app/app/maps/service/territory_service.dart';
 import 'package:nur_app/app/maps/service/directions_service.dart';
 import 'package:nur_app/app/maps/service/map_matching_service.dart';
-import 'package:nur_app/app/profile/service/achievement_service.dart';
+import 'package:nur_app/app/achievement/local/service/achievement_service.dart';
 import 'package:nur_app/app/profile/controller/profile_controller.dart';
 import 'package:nur_app/app/battles/controller/battle_controller.dart';
 import 'package:nur_app/app/user/service/user_service.dart';
+import 'package:nur_app/app/maps/usecases/run_save_usecase.dart';
+import 'package:nur_app/app/maps/usecases/run_stop_preparation_usecase.dart';
+import 'package:nur_app/core/services/http_service.dart';
 import 'package:nur_app/core/constants/api_constants.dart';
 import 'package:nur_app/core/theme/app_colors.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -27,7 +29,6 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 /// Controlador responsável por gerenciar o mapa, localização GPS e rastreamento de corridas
 class MapController extends GetxController {
@@ -102,6 +103,9 @@ class MapController extends GetxController {
   late final UserService _userService;
   late final DirectionsService _directionsService;
   late final MapMatchingService _mapMatchingService;
+  late final RunStopPreparationUseCase _runStopPreparationUseCase;
+  late final RunSaveUseCase _runSaveUseCase;
+  late final HttpService _httpService;
 
   // BattleController (opcional - só usado se houver batalha ativa)
   BattleController? _battleController;
@@ -199,6 +203,10 @@ class MapController extends GetxController {
     } else {
       print('ERRO: UserService não está registrado');
     }
+
+    _httpService = Get.find<HttpService>();
+    _runStopPreparationUseCase = Get.find<RunStopPreparationUseCase>();
+    _runSaveUseCase = Get.find<RunSaveUseCase>();
 
     // Inicializa o serviço de Directions para road snapping
     _directionsService = DirectionsService();
@@ -906,96 +914,6 @@ class MapController extends GetxController {
     return byteData!.buffer.asUint8List();
   }
 
-  /// Cria uma imagem circular a partir da foto de perfil do usuário
-  /// Se não houver foto, retorna null para usar o círculo colorido
-  /// Retorna os bytes da imagem que podem ser usados como ícone no mapa
-  Future<Uint8List?> _createProfileImageIcon() async {
-    try {
-      final user = _userService.currentUser.value;
-      if (user?.photoUrl == null || user!.photoUrl!.isEmpty) {
-        return null; // Não tem foto, usará círculo colorido
-      }
-
-      // Monta a URL completa da foto
-      String photoUrl = user.photoUrl!;
-      if (!photoUrl.startsWith('http')) {
-        photoUrl = '${ApiConstants.baseUrl}$photoUrl';
-      }
-
-      // Faz download da imagem
-      final response = await http
-          .get(Uri.parse(photoUrl))
-          .timeout(
-            const Duration(seconds: 5),
-            onTimeout: () {
-              throw Exception('Timeout ao carregar foto de perfil');
-            },
-          );
-
-      if (response.statusCode != 200) {
-        print(
-          '⚠️  Erro ao carregar foto de perfil: Status ${response.statusCode}',
-        );
-        return null; // Fallback para círculo colorido
-      }
-
-      // Decodifica e redimensiona a imagem para 40x40 (mesmo tamanho do círculo)
-      final codec = await ui.instantiateImageCodec(
-        response.bodyBytes,
-        targetWidth: 40,
-        targetHeight: 40,
-      );
-      final frame = await codec.getNextFrame();
-      final resizedImage = frame.image;
-
-      // Cria um canvas para desenhar a imagem circular
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-      final size = 40.0;
-
-      // Clippa para formato circular
-      final clipPath = Path()..addOval(Rect.fromLTWH(0, 0, size, size));
-      canvas.clipPath(clipPath);
-
-      // Desenha a imagem redimensionada
-      canvas.drawImageRect(
-        resizedImage,
-        Rect.fromLTWH(
-          0,
-          0,
-          resizedImage.width.toDouble(),
-          resizedImage.height.toDouble(),
-        ),
-        Rect.fromLTWH(0, 0, size, size),
-        Paint(),
-      );
-
-      // Adiciona borda colorida (opcional, para destacar)
-      final userColor = _getUserColor();
-      final borderPaint = Paint()
-        ..color = userColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2;
-      canvas.drawCircle(Offset(size / 2, size / 2), size / 2 - 1, borderPaint);
-
-      // Finaliza o desenho e converte para bytes PNG
-      final picture = recorder.endRecording();
-      final finalImage = await picture.toImage(size.toInt(), size.toInt());
-      final byteData = await finalImage.toByteData(
-        format: ui.ImageByteFormat.png,
-      );
-
-      // Libera recursos
-      resizedImage.dispose();
-      finalImage.dispose();
-
-      return byteData?.buffer.asUint8List();
-    } catch (e) {
-      print('⚠️  Erro ao criar ícone de foto de perfil: $e');
-      return null; // Fallback para círculo colorido em caso de erro
-    }
-  }
-
   /// Centraliza a câmera do mapa na localização atual do usuário
   /// Usa animação de voo (flyTo) para uma transição suave
   /// Mostra uma mensagem se a localização ainda não foi obtida
@@ -1165,39 +1083,25 @@ class MapController extends GetxController {
     }
 
     try {
-      if (_rawGpsPoints.isNotEmpty && !isApplyingMapMatching.value) {
-        print('🔄 Aplicando Map Matching final antes de mostrar resumo...');
-        await _applyMapMatching();
-        print('✅ Map Matching final concluído');
-      }
+      final result = await _runStopPreparationUseCase.execute(
+        hasRawGpsPoints: _rawGpsPoints.isNotEmpty,
+        isApplyingMapMatching: isApplyingMapMatching.value,
+        hasClosedCircuit: _hasClosedCircuit,
+        isClosedCircuit: _isClosedCircuit,
+        hasRunPath: currentRunPath.isNotEmpty,
+        applyMapMatching: _applyMapMatching,
+        captureSnapshot: _captureMapSnapshot,
+      );
 
       _lastSnappedPoint = null;
-      endTime.value = DateTime.now();
-      isTerritoryPending.value = _hasClosedCircuit || _isClosedCircuit();
-
-      if (currentRunPath.isNotEmpty) {
-        final storyImagePath = await _captureMapSnapshot(
-          width: 540,
-          height: 960,
-          addInfo: true,
-          fileSuffix: 'story',
-        );
-        final mapOnlyImagePath = await _captureMapSnapshot(
-          width: 600,
-          height: 800,
-          addInfo: false,
-          fileSuffix: 'map',
-          isTerritory: isTerritoryPending.value,
-        );
-        if (storyImagePath != null) {
-          _capturedRunImagePath = storyImagePath;
-        }
-        if (mapOnlyImagePath != null) {
-          _capturedRunMapOnlyImagePath = mapOnlyImagePath;
-        }
+      endTime.value = result.endTime;
+      isTerritoryPending.value = result.isTerritoryPending;
+      if (result.storyImagePath != null) {
+        _capturedRunImagePath = result.storyImagePath;
       }
-    } catch (e) {
-      print('❌ Erro ao preparar resumo da corrida: $e');
+      if (result.mapOnlyImagePath != null) {
+        _capturedRunMapOnlyImagePath = result.mapOnlyImagePath;
+      }
     } finally {
       isRunSummaryLoading.value = false;
     }
@@ -1211,20 +1115,54 @@ class MapController extends GetxController {
 
     try {
       final stopTime = endTime.value ?? DateTime.now();
+      final battleController = Get.isRegistered<BattleController>()
+          ? Get.find<BattleController>()
+          : null;
+      final result = await _runSaveUseCase.execute(
+        input: RunSaveInput(
+          stopTime: stopTime,
+          startTime: startTime.value,
+          runPath: currentRunPath,
+          distance: currentDistance.value,
+          duration: currentDuration.value,
+          isTerritoryPending: isTerritoryPending.value,
+          isSavingTerritory: _isSavingTerritory,
+          caption: runCaptionController.text.trim(),
+          mapImagePath: _capturedRunImagePath,
+          mapImageCleanPath: _capturedRunMapOnlyImagePath,
+          battleController: battleController,
+        ),
+        saveTerritoryCapture: () => _saveTerritory(skipStopRun: true),
+      );
 
-      final wasBattleHandled = await _submitBattleResultIfActive(stopTime);
-      if (wasBattleHandled) {
+      if (result.action == RunSaveAction.battleHandled) {
         _resetRunStateAfterSave();
         return;
       }
 
-      if (isTerritoryPending.value) {
-        await _saveTerritoryCapture();
-      } else if (!_isSavingTerritory &&
-          currentRunPath.isNotEmpty &&
-          startTime.value != null) {
-        await _saveSimpleRun(stopTime);
-      } else {
+      if (result.action == RunSaveAction.territorySaved) {
+        _closeRunSummaryOverlay();
+        _startLocationTracking();
+      } else if (result.action == RunSaveAction.simpleRunSaved) {
+        if (result.shouldClearCapturedImages) {
+          clearCapturedRunImagePath();
+        }
+        Get.snackbar(
+          'Corrida salva',
+          'Sua corrida foi enviada com sucesso.',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
+      } else if (result.action == RunSaveAction.simpleRunFailed) {
+        Get.snackbar(
+          'Erro ao salvar',
+          'Não foi possível salvar a corrida. Tente novamente.',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+      } else if (result.action == RunSaveAction.unavailable) {
         _showRunSaveUnavailable();
       }
 
@@ -1232,128 +1170,6 @@ class MapController extends GetxController {
     } finally {
       isSavingRun.value = false;
     }
-  }
-
-  Future<bool> _submitBattleResultIfActive(DateTime stopTime) async {
-    try {
-      if (!Get.isRegistered<BattleController>()) return false;
-      _battleController = Get.find<BattleController>();
-
-      if (!_battleController!.isInBattle.value ||
-          currentRunPath.isEmpty ||
-          startTime.value == null) {
-        return false;
-      }
-
-      final durationSeconds = stopTime.difference(startTime.value!).inSeconds;
-      final pathPoints = _buildPathPoints(
-        baseTimestamp: startTime.value!,
-        stopTime: stopTime,
-      );
-
-      await _battleController!.submitBattleResult(
-        distance: currentDistance.value,
-        duration: durationSeconds,
-        path: pathPoints,
-      );
-      print('✅ [BATALHA] Resultado submetido com sucesso');
-      return true;
-    } catch (e) {
-      print('⚠️ [BATALHA] Erro ao verificar batalha ativa: $e');
-      return false;
-    }
-  }
-
-  Future<void> _saveTerritoryCapture() async {
-    try {
-      await _saveTerritory(skipStopRun: true);
-      _closeRunSummaryOverlay();
-      _startLocationTracking();
-    } catch (e, stackTrace) {
-      print('❌ [TERRITÓRIO] Erro ao salvar manualmente: $e');
-      print('   Stack trace: $stackTrace');
-    }
-  }
-
-  Future<void> _saveSimpleRun(DateTime stopTime) async {
-    try {
-      print('🏃 [CORRIDA] Salvando corrida simples no servidor...');
-
-      final baseTimestamp = startTime.value!;
-      final pathPoints = _buildPathPoints(
-        baseTimestamp: baseTimestamp,
-        stopTime: stopTime,
-      );
-      final captionText = runCaptionController.text.trim();
-      final run = RunModel(
-        id: '',
-        startTime: baseTimestamp,
-        endTime: stopTime,
-        path: pathPoints,
-        distance: currentDistance.value,
-        duration: currentDuration.value,
-        caption: captionText.isNotEmpty ? captionText : null,
-      );
-
-      final mapImagePath = _capturedRunImagePath;
-      final mapImageCleanPath = _capturedRunMapOnlyImagePath;
-
-      await _territoryService.saveSimpleRun(
-        run,
-        mapImagePath: mapImagePath,
-        mapImageCleanPath: mapImageCleanPath,
-      );
-
-      if (mapImagePath != null || mapImageCleanPath != null) {
-        clearCapturedRunImagePath();
-      }
-
-      print('✅ [CORRIDA] Corrida simples salva com sucesso!');
-      Get.snackbar(
-        'Corrida salva',
-        'Sua corrida foi enviada com sucesso.',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 2),
-      );
-    } catch (e, stackTrace) {
-      print('❌ [CORRIDA] Erro ao salvar corrida simples: $e');
-      print('   Stack trace: $stackTrace');
-      Get.snackbar(
-        'Erro ao salvar',
-        'Não foi possível salvar a corrida. Tente novamente.',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-      );
-    }
-  }
-
-  List<PositionPoint> _buildPathPoints({
-    required DateTime baseTimestamp,
-    required DateTime stopTime,
-  }) {
-    final pathPoints = <PositionPoint>[];
-    final totalSeconds = stopTime.difference(baseTimestamp).inSeconds;
-    final intervalPerPoint = currentRunPath.length > 1
-        ? totalSeconds / (currentRunPath.length - 1)
-        : 0.0;
-
-    for (int i = 0; i < currentRunPath.length; i++) {
-      final pos = currentRunPath[i];
-      final timestamp = baseTimestamp.add(
-        Duration(seconds: (i * intervalPerPoint).round()),
-      );
-      pathPoints.add(
-        PositionPoint(
-          latitude: pos.lat.toDouble(),
-          longitude: pos.lng.toDouble(),
-          timestamp: timestamp,
-        ),
-      );
-    }
-
-    return pathPoints;
   }
 
   void _showRunSaveUnavailable() {
@@ -1831,7 +1647,10 @@ class MapController extends GetxController {
         );
 
         try {
-          final testResponse = await http.get(Uri.parse(testUrlWithoutOverlay));
+          final testResponse = await _httpService.getUrl(
+            testUrlWithoutOverlay,
+            includeAuth: false,
+          );
           if (testResponse.statusCode == 200) {
             print(
               '   ✅ Teste sem overlay: Mapa carregou com sucesso (${testResponse.bodyBytes.length} bytes)',
@@ -1845,9 +1664,7 @@ class MapController extends GetxController {
         }
       }
 
-      final response = await http
-          .get(Uri.parse(url))
-          .timeout(const Duration(seconds: 8));
+      final response = await _httpService.getUrl(url, includeAuth: false);
 
       if (response.statusCode != 200) {
         print('❌ Erro ao baixar imagem: Status ${response.statusCode}');
@@ -1964,69 +1781,6 @@ class MapController extends GetxController {
       return frame.image;
     } catch (e) {
       print('❌ Erro ao converter imagem: $e');
-      return null;
-    }
-  }
-
-  /// Carrega um SVG e renderiza em alta resolução como ui.Image
-  /// size: tamanho desejado em pixels (quanto maior, melhor a qualidade)
-  Future<ui.Image?> _loadSvgAsUiImage(String assetPath, double size) async {
-    try {
-      print('   🎨 Carregando SVG: $assetPath em ${size}x${size}px...');
-
-      // Carrega o SVG usando flutter_svg (versão 2.0+)
-      final svgString = await rootBundle.loadString(assetPath);
-
-      // Usa a nova API do flutter_svg 2.0
-      final pictureInfo = await vg.loadPicture(
-        SvgStringLoader(svgString),
-        null,
-      );
-
-      // Obtém as dimensões do SVG
-      final pictureSize = pictureInfo.size;
-      final svgWidth = pictureSize.width;
-      final svgHeight = pictureSize.height;
-
-      print('   📐 SVG original: ${svgWidth}x${svgHeight}');
-
-      // Calcula o scale para manter proporção e preencher o tamanho desejado
-      final scale = size / math.max(svgWidth, svgHeight);
-
-      print('   🔍 Scale calculado: $scale');
-
-      // Renderiza diretamente o Picture em um canvas e converte para Image
-      // Isso garante que as cores sejam preservadas corretamente
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-
-      // Desenha um fundo transparente (necessário para PNG com transparência)
-      // Não desenhamos fundo, deixamos transparente
-
-      // Move para o centro e aplica o scale
-      canvas.save();
-      canvas.translate(size / 2, size / 2);
-      canvas.scale(scale);
-      canvas.translate(-svgWidth / 2, -svgHeight / 2);
-
-      // Renderiza o SVG no canvas
-      canvas.drawPicture(pictureInfo.picture);
-      canvas.restore();
-
-      // Finaliza e converte para ui.Image
-      final picture = recorder.endRecording();
-      final uiImage = await picture.toImage(size.toInt(), size.toInt());
-
-      // Limpa o Picture da memória
-      pictureInfo.picture.dispose();
-
-      print(
-        '   ✅ SVG carregado e renderizado: ${uiImage.width}x${uiImage.height}px',
-      );
-      return uiImage;
-    } catch (e, stackTrace) {
-      print('   ❌ Erro ao carregar SVG: $e');
-      print('   Stack trace: $stackTrace');
       return null;
     }
   }
@@ -2207,330 +1961,6 @@ class MapController extends GetxController {
       // Retorna a imagem original se houver erro
       return image;
     }
-  }
-
-  /// Cria uma imagem minimalista da corrida (estilo social media)
-  /// Fundo com cor do tema, trajeto como linha simples, estatísticas, logo e nome do app
-  /// Formato 9:16 (vertical) para Instagram Stories
-  Future<img.Image> _createMinimalistRunImage() async {
-    try {
-      print('🎨 Criando imagem minimalista da corrida...');
-
-      // Obtém informações do usuário e da corrida
-      final user = _userService.currentUser.value;
-      final userName = user?.name ?? user?.username ?? 'Corredor';
-      final distance = currentDistance.value;
-      final duration = currentDuration.value;
-
-      // Formata distância
-      final distanceKm = distance >= 1000
-          ? '${(distance / 1000).toStringAsFixed(2)} km'
-          : '${distance.toStringAsFixed(0)} m';
-
-      // Calcula o pace (min/km)
-      String paceText = '--:-- /km';
-      if (distance > 0 && duration.inSeconds > 0) {
-        final paceSeconds = (duration.inSeconds / (distance / 1000)).round();
-        final paceMinutes = paceSeconds ~/ 60;
-        final paceSecs = paceSeconds % 60;
-        paceText =
-            '${paceMinutes.toString().padLeft(2, '0')}:${paceSecs.toString().padLeft(2, '0')} /km';
-      }
-
-      // Formata o tempo
-      final hours = duration.inHours;
-      final minutes = duration.inMinutes.remainder(60);
-      final seconds = duration.inSeconds.remainder(60);
-      String timeText;
-      if (hours > 0) {
-        timeText =
-            '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-      } else {
-        timeText =
-            '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-      }
-
-      // Formato 9:16 (vertical) para Instagram Stories
-      // 1080x1920 pixels (mesmo formato da imagem do mapa)
-      const int width = 1080;
-      const int height = 1920;
-
-      // Cria o canvas
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(
-        recorder,
-        Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
-      );
-
-      // 1. Carrega e desenha a imagem de fundo
-      try {
-        print('   🖼️ Carregando imagem de fundo...');
-        final backgroundBytes = await rootBundle.load(
-          'assets/images/background_run.png',
-        );
-        final backgroundCodec = await ui.instantiateImageCodec(
-          backgroundBytes.buffer.asUint8List(),
-        );
-        final backgroundFrame = await backgroundCodec.getNextFrame();
-        final backgroundImage = backgroundFrame.image;
-
-        // Desenha a imagem de fundo preenchendo todo o canvas
-        canvas.drawImageRect(
-          backgroundImage,
-          Rect.fromLTWH(
-            0,
-            0,
-            backgroundImage.width.toDouble(),
-            backgroundImage.height.toDouble(),
-          ),
-          Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
-          Paint()..filterQuality = FilterQuality.high,
-        );
-        print('   ✅ Imagem de fundo desenhada');
-      } catch (e) {
-        print('   ⚠️ Erro ao carregar imagem de fundo: $e, usando cor sólida');
-        // Fallback: usa cor sólida se a imagem não carregar
-        final backgroundPaint = Paint()
-          ..color = AppColors.surface
-          ..style = PaintingStyle.fill;
-        canvas.drawRect(
-          Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
-          backgroundPaint,
-        );
-      }
-
-      // 2. Desenha o trajeto como uma linha simples (sem mapa)
-      if (currentRunPath.isNotEmpty) {
-        print(
-          '   📍 Desenhando trajeto com ${currentRunPath.length} pontos...',
-        );
-
-        // Calcula os limites do trajeto para centralizar e escalar
-        double minLat = currentRunPath.first.lat.toDouble();
-        double maxLat = currentRunPath.first.lat.toDouble();
-        double minLng = currentRunPath.first.lng.toDouble();
-        double maxLng = currentRunPath.first.lng.toDouble();
-
-        for (final pos in currentRunPath) {
-          final lat = pos.lat;
-          final lng = pos.lng;
-          if (lat < minLat) minLat = lat.toDouble();
-          if (lat > maxLat) maxLat = lat.toDouble();
-          if (lng < minLng) minLng = lng.toDouble();
-          if (lng > maxLng) maxLng = lng.toDouble();
-        }
-
-        // Área para desenhar o trajeto (centro da imagem, deixando espaço para texto e logo)
-        const double pathAreaTop =
-            600.0; // Espaço aumentado para mais distância das informações
-        const double pathAreaBottom = 400.0; // Espaço para logo
-        const double pathAreaLeft = 100.0;
-        const double pathAreaRight = 100.0;
-        final double pathAreaWidth = width - pathAreaLeft - pathAreaRight;
-        final double pathAreaHeight = height - pathAreaTop - pathAreaBottom;
-
-        // Calcula escala e offset para centralizar o trajeto
-        // Normaliza as coordenadas para desenhar corretamente
-        final double latRange = maxLat - minLat;
-        final double lngRange = maxLng - minLng;
-
-        // Usa a maior range para manter proporção
-        final double maxRange = math.max(latRange, lngRange);
-        final double scale = maxRange > 0
-            ? (math.min(pathAreaWidth, pathAreaHeight) / maxRange) *
-                  0.9 // 90% para padding
-            : 1.0;
-
-        final double centerLat = (minLat + maxLat) / 2;
-        final double centerLng = (minLng + maxLng) / 2;
-
-        // Offset para centralizar (latitude aumenta para cima, então inverte Y)
-        final double offsetX =
-            pathAreaLeft + pathAreaWidth / 2 - centerLng * scale;
-        final double offsetY =
-            pathAreaTop + pathAreaHeight / 2 + centerLat * scale; // Inverte Y
-
-        // Desenha o trajeto como linha
-        Color pathColor = AppColors.background; // Ciano vibrante (padrão)
-
-        final pathPaint = Paint()
-          ..color = pathColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth =
-              10.0 // Aumentado para melhor visibilidade
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round;
-
-        final path = Path();
-        bool isFirst = true;
-        for (final pos in currentRunPath) {
-          // Normaliza coordenadas relativas ao centro
-          final double normalizedLng = (pos.lng - centerLng) * scale;
-          final double normalizedLat = (pos.lat - centerLat) * scale;
-
-          // Converte para coordenadas do canvas (inverte Y porque lat aumenta para cima)
-          final double x = pathAreaLeft + pathAreaWidth / 2 + normalizedLng;
-          final double y = pathAreaTop + pathAreaHeight / 2 - normalizedLat;
-
-          if (isFirst) {
-            path.moveTo(x, y);
-            isFirst = false;
-          } else {
-            path.lineTo(x, y);
-          }
-        }
-        canvas.drawPath(path, pathPaint);
-        print('   ✅ Trajeto desenhado');
-      }
-
-      // 3. Desenha estatísticas centralizadas no topo
-      double statsTop = 80.0;
-
-      // Estilo para labels (texto pequeno)
-      final labelStyle = const TextStyle(
-        color: AppColors.surface,
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-      );
-
-      // Estilo para valores (texto grande)
-      final valueStyle = const TextStyle(
-        color: Colors.white,
-        fontSize: 72,
-        fontWeight: FontWeight.bold,
-      );
-
-      // Distância
-      final distanceLabel = TextPainter(
-        text: TextSpan(text: 'Distância', style: labelStyle),
-        textDirection: TextDirection.ltr,
-      );
-      distanceLabel.layout();
-      final distanceLabelX = (width - distanceLabel.width) / 2; // Centraliza
-      distanceLabel.paint(canvas, Offset(distanceLabelX, statsTop));
-
-      final distanceValue = TextPainter(
-        text: TextSpan(text: distanceKm, style: valueStyle),
-        textDirection: TextDirection.ltr,
-      );
-      distanceValue.layout();
-      final distanceValueX = (width - distanceValue.width) / 2; // Centraliza
-      distanceValue.paint(canvas, Offset(distanceValueX, statsTop + 40));
-
-      statsTop += 180; // Aumentado para mais espaçamento
-
-      // Pace
-      final paceLabel = TextPainter(
-        text: TextSpan(text: 'Pace', style: labelStyle),
-        textDirection: TextDirection.ltr,
-      );
-      paceLabel.layout();
-      final paceLabelX = (width - paceLabel.width) / 2; // Centraliza
-      paceLabel.paint(canvas, Offset(paceLabelX, statsTop));
-
-      final paceValue = TextPainter(
-        text: TextSpan(text: paceText, style: valueStyle),
-        textDirection: TextDirection.ltr,
-      );
-      paceValue.layout();
-      final paceValueX = (width - paceValue.width) / 2; // Centraliza
-      paceValue.paint(canvas, Offset(paceValueX, statsTop + 40));
-
-      statsTop += 180; // Aumentado para mais espaçamento
-
-      // Tempo
-      final timeLabel = TextPainter(
-        text: TextSpan(text: 'Tempo', style: labelStyle),
-        textDirection: TextDirection.ltr,
-      );
-      timeLabel.layout();
-      final timeLabelX = (width - timeLabel.width) / 2; // Centraliza
-      timeLabel.paint(canvas, Offset(timeLabelX, statsTop));
-
-      final timeValue = TextPainter(
-        text: TextSpan(text: timeText, style: valueStyle),
-        textDirection: TextDirection.ltr,
-      );
-      timeValue.layout();
-      final timeValueX = (width - timeValue.width) / 2; // Centraliza
-      timeValue.paint(canvas, Offset(timeValueX, statsTop + 40));
-
-      // 4. Carrega e desenha a logo do app (PNG)
-      try {
-        print('   🎨 Carregando logo PNG...');
-        final logoBytes = await rootBundle.load('assets/images/domrun.png');
-        final logoCodec = await ui.instantiateImageCodec(
-          logoBytes.buffer.asUint8List(),
-        );
-        final logoFrame = await logoCodec.getNextFrame();
-        final logoImage = logoFrame.image;
-
-        // Desenha a logo no canto inferior direito
-        const double logoSize = 220.0;
-        const double logoRight = 60.0;
-        const double logoBottom = 60.0;
-        final logoRect = Rect.fromLTWH(
-          width - logoRight - logoSize,
-          height - logoBottom - logoSize,
-          logoSize,
-          logoSize,
-        );
-
-        // Usa drawImageRect com alta qualidade
-        canvas.drawImageRect(
-          logoImage,
-          Rect.fromLTWH(
-            0,
-            0,
-            logoImage.width.toDouble(),
-            logoImage.height.toDouble(),
-          ),
-          logoRect,
-          Paint()..filterQuality = FilterQuality.high,
-        );
-        print('   ✅ Logo PNG desenhada em alta qualidade');
-      } catch (e, stackTrace) {
-        print('   ⚠️ Erro ao carregar logo PNG: $e');
-        print('   Stack trace: $stackTrace');
-      }
-
-      // Finaliza o desenho
-      final picture = recorder.endRecording();
-      final finalUiImage = await picture.toImage(width, height);
-      final byteData = await finalUiImage.toByteData(
-        format: ui.ImageByteFormat.png,
-      );
-
-      if (byteData == null) {
-        print('❌ Erro ao converter imagem minimalista para bytes');
-        throw Exception('Erro ao converter imagem');
-      }
-
-      // Converte para img.Image
-      final finalImageBytes = byteData.buffer.asUint8List();
-      final finalImage = img.decodeImage(finalImageBytes);
-
-      if (finalImage == null) {
-        print('❌ Erro ao decodificar imagem minimalista');
-        throw Exception('Erro ao decodificar imagem');
-      }
-
-      print(
-        '✅ Imagem minimalista criada: ${finalImage.width}x${finalImage.height}',
-      );
-      return finalImage;
-    } catch (e, stackTrace) {
-      print('❌ Erro ao criar imagem minimalista: $e');
-      print('Stack trace: $stackTrace');
-      rethrow;
-    }
-  }
-
-  /// Simplifica o trajeto para reduzir o tamanho da URL da API Static Images
-  /// Mantém primeiro, último e pontos distribuídos uniformemente
-  /// Limite: 50 pontos para garantir URLs menores que 2048 caracteres
-  List<mb.Position> _simplifyPathForImage(List<mb.Position> path) {
-    return _simplifyPathToMaxPoints(path, 50);
   }
 
   /// Simplifica o trajeto para um número máximo de pontos usando algoritmo de Douglas-Peucker
@@ -3692,14 +3122,7 @@ class MapController extends GetxController {
       // Verifica se AchievementService está registrado
       if (!Get.isRegistered<AchievementService>()) {
         print('❌ [CONQUISTAS] AchievementService não está registrado!');
-        print('   Tentando registrar...');
-        try {
-          Get.put<AchievementService>(AchievementService(), permanent: true);
-          print('✅ [CONQUISTAS] AchievementService registrado com sucesso');
-        } catch (e) {
-          print('❌ [CONQUISTAS] Erro ao registrar AchievementService: $e');
-          return;
-        }
+        return;
       }
 
       final achievementService = Get.find<AchievementService>();

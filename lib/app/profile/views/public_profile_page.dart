@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nur_app/app/profile/controller/public_profile_controller.dart';
-import 'package:nur_app/app/profile/data/achievements_data.dart';
-import 'package:nur_app/app/profile/models/achievement_definition.dart';
-import 'package:nur_app/app/profile/models/achievement_model.dart';
+import 'package:nur_app/app/achievement/local/data/achievements_data.dart';
+import 'package:nur_app/app/achievement/local/models/achievement_definition.dart';
+import 'package:nur_app/app/achievement/local/models/achievement_model.dart';
 import 'package:nur_app/app/profile/models/public_user_profile.dart';
 import 'package:nur_app/core/theme/app_colors.dart';
 import 'package:nur_app/core/utils/responsive.dart';
@@ -45,55 +45,74 @@ class _PublicProfilePageState extends State<PublicProfilePage> {
 
     return Scaffold(
       backgroundColor: AppColors.surfaceDark,
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+      body: _buildBody(controller, responsive),
+    );
+  }
+
+  Widget _buildBody(
+    PublicProfileController controller,
+    Responsive responsive,
+  ) {
+    return Stack(
+      children: [
+        Obx(
+          () => controller.isLoading.value
+              ? Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+        Obx(
+          () => (!controller.isLoading.value &&
+                  controller.error.value != null)
+              ? Center(
+                  child: Text(
+                    'Erro ao carregar perfil',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: responsive.fontSize(16),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+        Obx(() {
+          if (controller.isLoading.value || controller.error.value != null) {
+            return const SizedBox.shrink();
+          }
+
+          final user = controller.user.value;
+          if (user == null) {
+            return const SizedBox.shrink();
+          }
+
+          final userColor = _hexToColor(user.color);
+          final totalDistanceKm =
+              user.runs.fold<double>(0, (sum, run) => sum + run.distance) /
+                  1000;
+          final territoryAreaKm2 = (user.totalTerritoryAreaM2 ?? 0) / 1000000;
+
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildHeader(context, responsive),
+                _buildProfileSection(user, responsive, userColor),
+                _buildStatsSection(
+                  responsive,
+                  totalDistanceKm,
+                  territoryAreaKm2,
+                  user.trophies,
+                ),
+                _buildTabsSection(responsive),
+                _buildTabContent(user, responsive),
+                SizedBox(height: responsive.hp(60)),
+              ],
             ),
           );
-        }
-
-        if (controller.error.value != null) {
-          return Center(
-            child: Text(
-              'Erro ao carregar perfil',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: responsive.fontSize(16),
-              ),
-            ),
-          );
-        }
-
-        final user = controller.user.value;
-        if (user == null) {
-          return const SizedBox.shrink();
-        }
-
-        final userColor = _hexToColor(user.color);
-        final totalDistanceKm =
-            user.runs.fold<double>(0, (sum, run) => sum + run.distance) / 1000;
-        final territoryAreaKm2 = (user.totalTerritoryAreaM2 ?? 0) / 1000000;
-
-        return SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildHeader(context, responsive),
-              _buildProfileSection(user, responsive, userColor),
-              _buildStatsSection(
-                responsive,
-                totalDistanceKm,
-                territoryAreaKm2,
-                user.trophies,
-              ),
-              _buildTabsSection(responsive),
-              _buildTabContent(user, responsive),
-              SizedBox(height: responsive.hp(60)),
-            ],
-          ),
-        );
-      }),
+        }),
+      ],
     );
   }
 
@@ -884,36 +903,38 @@ class _PublicProfilePageState extends State<PublicProfilePage> {
     );
   }
 
-  Color _hexToColor(String? hexColor) {
-    if (hexColor == null || hexColor.isEmpty) {
-      return AppColors.white;
-    }
+}
 
-    final sanitized = hexColor.replaceAll('#', '');
-    if (sanitized.length != 6) {
-      return AppColors.white;
-    }
-
-    return Color(int.parse('FF$sanitized', radix: 16));
+Color _hexToColor(String? hexColor) {
+  if (hexColor == null || hexColor.isEmpty) {
+    return AppColors.white;
   }
 
-  String _getAchievementImage(String medal, AchievementStatus status) {
-    if (status != AchievementStatus.completed) {
-      return 'assets/medal/default.png';
-    }
+  final sanitized = hexColor.replaceAll('#', '');
+  if (sanitized.length != 6) {
+    return AppColors.white;
+  }
 
-    switch (medal.toLowerCase()) {
-      case 'bronze':
-        return 'assets/medal/bronze.png';
-      case 'silver':
-        return 'assets/medal/silver.png';
-      case 'gold':
-        return 'assets/medal/gold.png';
-      case 'legendary':
-      case 'lenda':
-        return 'assets/medal/lenda.png';
-      default:
-        return 'assets/medal/default.png';
-    }
+  return Color(int.parse('FF$sanitized', radix: 16));
+}
+
+String _getAchievementImage(String medal, AchievementStatus status) {
+  if (status != AchievementStatus.completed) {
+    return 'assets/medal/default.png';
+  }
+
+  switch (medal.toLowerCase()) {
+    case 'bronze':
+      return 'assets/medal/bronze.png';
+    case 'silver':
+      return 'assets/medal/silver.png';
+    case 'gold':
+      return 'assets/medal/gold.png';
+    case 'legendary':
+    case 'lenda':
+      return 'assets/medal/lenda.png';
+    default:
+      return 'assets/medal/default.png';
   }
 }
+

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nur_app/app/battles/controller/battle_controller.dart';
 import 'package:nur_app/app/battles/models/battle_model.dart';
-import 'package:nur_app/app/auth/service/auth_service.dart';
 import 'package:nur_app/app/user/service/user_service.dart';
 import 'package:nur_app/core/theme/app_colors.dart';
 import 'package:nur_app/core/utils/responsive.dart';
@@ -24,26 +23,34 @@ class BattlePage extends StatelessWidget {
         backgroundColor: AppColors.background,
         foregroundColor: Colors.white,
       ),
-      body: Obx(() {
-        // Se está procurando oponente
-        if (controller.isSearchingOpponent.value) {
-          return _buildSearchingView(context, controller, responsive);
-        }
-
-        // Se está em uma batalha
-        if (controller.isInBattle.value &&
-            controller.currentBattle.value != null) {
-          return _buildBattleInProgressView(context, controller, responsive);
-        }
-
-        // Se há resultado da batalha
-        if (controller.battleResult.value != null) {
-          return _buildBattleResultView(context, controller, responsive);
-        }
-
-        // Tela inicial - escolher modo de batalha
-        return _buildModeSelectionView(context, controller, responsive);
-      }),
+      body: Stack(
+        children: [
+          Obx(
+            () => controller.isSearchingOpponent.value
+                ? _buildSearchingView(context, controller, responsive)
+                : const SizedBox.shrink(),
+          ),
+          Obx(
+            () => controller.isInBattle.value &&
+                    controller.currentBattle.value != null
+                ? _buildBattleInProgressView(context, controller, responsive)
+                : const SizedBox.shrink(),
+          ),
+          Obx(
+            () => controller.battleResult.value != null
+                ? _buildBattleResultView(context, controller, responsive)
+                : const SizedBox.shrink(),
+          ),
+          Obx(
+            () => !controller.isSearchingOpponent.value &&
+                    !(controller.isInBattle.value &&
+                        controller.currentBattle.value != null) &&
+                    controller.battleResult.value == null
+                ? _buildModeSelectionView(context, controller, responsive)
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -221,7 +228,6 @@ class BattlePage extends StatelessWidget {
 
     // Determina qual jogador é o usuário atual
     final isPlayer1 = battle.player1Id == user?.id;
-    final player = isPlayer1 ? battle.player1 : battle.player2;
     final opponent = isPlayer1 ? battle.player2 : battle.player1;
 
     return Padding(

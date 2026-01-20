@@ -1,16 +1,22 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
 import 'package:nur_app/app/ranking/models/trophy_ranking_entry.dart';
 import 'package:nur_app/core/constants/api_constants.dart';
+import 'package:nur_app/core/services/http_service.dart';
 
 /// Serviço para buscar ranking por troféus (rota pública)
 class RankingService {
+  final HttpService _httpService = Get.find<HttpService>();
+
   Future<List<TrophyRankingEntry>> getTrophyRanking({int limit = 10}) async {
     final safeLimit = limit.clamp(1, 100);
-    final url =
-        '${ApiConstants.baseUrl}${ApiConstants.trophyRankingEndpoint}?limit=$safeLimit';
+    final endpoint =
+        '${ApiConstants.trophyRankingEndpoint}?limit=$safeLimit';
 
-    final response = await http.get(Uri.parse(url));
+    final response = await _httpService.get(
+      endpoint,
+      includeAuth: false,
+    );
     if (response.statusCode != 200) {
       throw Exception(
         'Erro ao buscar ranking: Status ${response.statusCode}',

@@ -1,14 +1,19 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
 import 'package:nur_app/app/profile/models/public_user_profile.dart';
 import 'package:nur_app/core/constants/api_constants.dart';
+import 'package:nur_app/core/services/http_service.dart';
 
 /// Serviço para buscar perfil público de um usuário
 class PublicProfileService {
+  final HttpService _httpService = Get.find<HttpService>();
+
   Future<PublicUserProfile> getUserById(String userId) async {
-    final url =
-        '${ApiConstants.baseUrl}${ApiConstants.publicUserEndpoint}/$userId';
-    final response = await http.get(Uri.parse(url));
+    final endpoint = '${ApiConstants.publicUserEndpoint}/$userId';
+    final response = await _httpService.get(
+      endpoint,
+      includeAuth: false,
+    );
     if (response.statusCode != 200) {
       throw Exception('Erro ao buscar usuário: Status ${response.statusCode}');
     }

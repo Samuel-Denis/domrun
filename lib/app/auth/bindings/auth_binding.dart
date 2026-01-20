@@ -14,16 +14,14 @@ class AuthBinding extends Bindings {
     // StorageService já está registrado no main.dart como permanente
     // Não precisa registrar novamente aqui
 
-    // Registra o AuthService como um serviço permanente
-    Get.lazyPut<AuthService>(
-      () => AuthService(),
-      fenix: true,
-    );
+    // Registra o AuthService se ainda não estiver registrado
+    if (!Get.isRegistered<AuthService>()) {
+      Get.lazyPut<AuthService>(() => AuthService(), fenix: true);
+    }
 
-    // Registra o LoginController como permanente para evitar dispose
-    // enquanto a tela ainda está montada.
+    // Registra o LoginController sob demanda
     if (!Get.isRegistered<LoginController>()) {
-      Get.put<LoginController>(LoginController(), permanent: true);
+      Get.lazyPut<LoginController>(() => LoginController(), fenix: true);
     }
   }
 }

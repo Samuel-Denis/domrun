@@ -32,53 +32,74 @@ class RankingPage extends StatelessWidget {
         title: const Text('Ranking'),
         centerTitle: true,
       ),
-      body: Obx(() {
-        if (c.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (c.error.value != null) {
-          return _ErrorState(message: c.error.value!, onRetry: () => c.load());
-        }
-
-        if (c.users.isEmpty) {
-          return _EmptyState(onReload: () => c.load());
-        }
-
-        final users = c.users;
-
-        final TrophyRankingEntry? first = users.isNotEmpty ? users[0] : null;
-        final TrophyRankingEntry? second = users.length > 1 ? users[1] : null;
-        final TrophyRankingEntry? third = users.length > 2 ? users[2] : null;
-
-        final List<TrophyRankingEntry> rest = users.length > 3
-            ? users.sublist(3)
-            : const [];
-
-        return RefreshIndicator(
-          onRefresh: () => c.load(),
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-            children: [
-              _Top3Podium(first: first, second: second, third: third),
-              const SizedBox(height: 16),
-              const _SectionTitle(title: 'Top jogadores por troféus'),
-              const SizedBox(height: 12),
-              ...rest.map(
-                (entry) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: _RankingRow(entry: entry),
-                ),
-              ),
-            ],
-          ),
-        );
-      }),
+      body: _RankingBody(controller: c),
     );
   }
 }
 
 /* -------------------- Widgets -------------------- */
+
+class _RankingBody extends StatelessWidget {
+  final RankingController controller;
+  const _RankingBody({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Obx(
+          () => controller.isLoading.value
+              ? const Center(child: CircularProgressIndicator())
+              : const SizedBox.shrink(),
+        ),
+        Obx(
+          () => (!controller.isLoading.value && controller.error.value != null)
+              ? _ErrorState(
+                  message: controller.error.value!,
+                  onRetry: () => controller.load(),
+                )
+              : const SizedBox.shrink(),
+        ),
+        Obx(() {
+          if (controller.isLoading.value || controller.error.value != null) {
+            return const SizedBox.shrink();
+          }
+
+          if (controller.users.isEmpty) {
+            return _EmptyState(onReload: () => controller.load());
+          }
+
+          final users = controller.users;
+          final TrophyRankingEntry? first = users.isNotEmpty ? users[0] : null;
+          final TrophyRankingEntry? second = users.length > 1 ? users[1] : null;
+          final TrophyRankingEntry? third = users.length > 2 ? users[2] : null;
+
+          final List<TrophyRankingEntry> rest =
+              users.length > 3 ? users.sublist(3) : const [];
+
+          return RefreshIndicator(
+            onRefresh: () => controller.load(),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              children: [
+                _Top3Podium(first: first, second: second, third: third),
+                const SizedBox(height: 16),
+                const _SectionTitle(title: 'Top jogadores por troféus'),
+                const SizedBox(height: 12),
+                ...rest.map(
+                  (entry) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _RankingRow(entry: entry),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
 
 class _SectionTitle extends StatelessWidget {
   final String title;

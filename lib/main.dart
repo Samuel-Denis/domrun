@@ -7,6 +7,7 @@ import 'package:nur_app/app/navigation/controller/navigation_controller.dart';
 import 'package:nur_app/app/user/service/user_service.dart';
 import 'package:nur_app/core/constants/api_constants.dart';
 import 'package:nur_app/core/constants/app_constants.dart';
+import 'package:nur_app/core/services/http_service.dart';
 import 'package:nur_app/core/services/storage_service.dart';
 import 'package:nur_app/core/theme/app_theme.dart';
 import 'package:nur_app/routes/app_pages.dart';
@@ -21,14 +22,21 @@ void main() async {
   // Registra o StorageService como serviço global
   Get.put(StorageService(), permanent: true);
 
+  // Registra o HttpService como serviço global
+  Get.put(HttpService(), permanent: true);
+
   // Registra o UserService como serviço global
   Get.put(UserService(), permanent: true);
 
   // Registra o AuthService como serviço global
   final authService = Get.put(AuthService(), permanent: true);
+  Get.find<HttpService>().setAuthService(authService);
 
-  // Registra o NavigationController como serviço global
-  Get.put(NavigationController(), permanent: true);
+  // Registra o NavigationController sob demanda (controller de UI)
+  Get.lazyPut<NavigationController>(
+    () => NavigationController(),
+    fenix: true,
+  );
 
   // Configura o token do Mapbox usando constantes
   MapboxOptions.setAccessToken(ApiConstants.mapboxAccessToken);

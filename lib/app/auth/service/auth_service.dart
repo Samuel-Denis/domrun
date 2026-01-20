@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:nur_app/app/auth/models/user_model.dart';
 import 'package:nur_app/app/user/service/user_service.dart';
 import 'package:nur_app/core/constants/api_constants.dart';
+import 'package:nur_app/core/services/http_service.dart';
 import 'package:nur_app/core/services/storage_service.dart';
 
 /// Serviço de autenticação
@@ -15,6 +16,7 @@ class AuthService extends GetxService {
   // Serviço de storage para guardar tokens
   late final StorageService _storage;
   late final UserService _userService;
+  late final HttpService _httpService;
 
   // Indica se o usuário está autenticado
   bool get isAuthenticated => _userService.hasUser;
@@ -28,6 +30,7 @@ class AuthService extends GetxService {
     // Inicializa o storage
     _storage = Get.find<StorageService>();
     _userService = Get.find<UserService>();
+    _httpService = Get.find<HttpService>();
     // checkAuthStatus() é chamado no main.dart para garantir que os dados
     // sejam carregados antes de definir a rota inicial
   }
@@ -68,10 +71,10 @@ class AuthService extends GetxService {
       };
 
       // Faz a requisição POST para fazer login
-      final response = await http.post(
-        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.loginEndpoint}'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(requestBody),
+      final response = await _httpService.post(
+        ApiConstants.loginEndpoint,
+        requestBody,
+        includeAuth: false,
       );
 
       // Verifica se a requisição foi bem-sucedida (status 200/201)
@@ -172,10 +175,10 @@ class AuthService extends GetxService {
       };
 
       // Faz a requisição POST para registrar o usuário
-      final response = await http.post(
-        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.registerEndpoint}'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(requestBody),
+      final response = await _httpService.post(
+        ApiConstants.registerEndpoint,
+        requestBody,
+        includeAuth: false,
       );
 
       // Verifica se a requisição foi bem-sucedida (status 201 Created)
@@ -332,10 +335,10 @@ class AuthService extends GetxService {
       final requestBody = {'refresh_token': refreshToken};
 
       // Faz a requisição POST para renovar o token
-      final response = await http.post(
-        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.refreshEndpoint}'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(requestBody),
+      final response = await _httpService.post(
+        ApiConstants.refreshEndpoint,
+        requestBody,
+        includeAuth: false,
       );
 
       // Verifica se a requisição foi bem-sucedida (status 200 OK)
@@ -397,10 +400,10 @@ class AuthService extends GetxService {
         try {
           final requestBody = {'refresh_token': refreshToken};
 
-          await http.post(
-            Uri.parse('${ApiConstants.baseUrl}${ApiConstants.logoutEndpoint}'),
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode(requestBody),
+          await _httpService.post(
+            ApiConstants.logoutEndpoint,
+            requestBody,
+            includeAuth: false,
           );
         } catch (e) {
           // Se falhar ao invalidar no servidor, continua com a limpeza local
@@ -451,12 +454,11 @@ class AuthService extends GetxService {
         ),
       );
 
-      // Obtém o access token
-      final accessToken = _storage.getAccessToken();
-      if (accessToken == null) {
+      final headers = await _httpService.getHeaders();
+      if (!headers.containsKey('Authorization')) {
         throw Exception('Token de acesso não encontrado');
       }
-      request.headers['Authorization'] = 'Bearer $accessToken';
+      request.headers.addAll(headers);
 
       request.fields.addAll({
         'name': name,

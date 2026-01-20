@@ -6,32 +6,18 @@ import 'package:nur_app/app/maps/models/territory_model.dart';
 import 'package:nur_app/app/maps/models/run_model.dart';
 import 'package:nur_app/app/maps/models/geojson_models.dart';
 import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/core/services/storage_service.dart';
+import 'package:nur_app/core/services/http_service.dart';
 
 /// Serviço para gerenciar territórios
 /// Envia territórios capturados para o servidor
 class TerritoryService extends GetxService {
-  // Serviço de storage para obter tokens
-  late final StorageService _storage;
+  late final HttpService _httpService;
   bool _sendRunImages = false;
 
   @override
   Future<void> onInit() async {
     super.onInit();
-    _storage = Get.find<StorageService>();
-  }
-
-  /// Obtém os headers com autenticação
-  Future<Map<String, String>> _getHeaders() async {
-    final headers = <String, String>{'Content-Type': 'application/json'};
-
-    // Adiciona o access token se disponível
-    final accessToken = _storage.getAccessToken();
-    if (accessToken != null) {
-      headers['Authorization'] = 'Bearer $accessToken';
-    }
-
-    return headers;
+    _httpService = Get.find<HttpService>();
   }
 
   /// Salva um território capturado no servidor
@@ -52,16 +38,12 @@ class TerritoryService extends GetxService {
   /// Lança uma exceção se houver erro
   Future<TerritoryModel> saveTerritory(TerritoryModel territory) async {
     try {
-      final headers = await _getHeaders();
-      final url = '${ApiConstants.baseUrl}${ApiConstants.runsEndpoint}';
+      final url = ApiConstants.runsEndpoint;
       // Prepara o JSON do território (usado em ambos os casos)
       final requestBody = territory.toJson();
-      final jsonBody = json.encode(requestBody);
-
-      final response = await http.post(
-        Uri.parse(url),
-        headers: headers,
-        body: jsonBody,
+      final response = await _httpService.post(
+        url,
+        requestBody,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -98,9 +80,9 @@ class TerritoryService extends GetxService {
         print('🔍 Buscando territories no formato GeoJSON na URL: $url');
       }
 
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
+      final response = await _httpService.getUrl(
+        url,
+        includeAuth: false,
       );
 
       print('📡 Resposta da API: Status ${response.statusCode}');
@@ -141,13 +123,11 @@ class TerritoryService extends GetxService {
   /// Prefira usar getMapTerritories() e filtrar pelo usuário
   Future<List<TerritoryModel>> getUserTerritories() async {
     try {
-      final headers = await _getHeaders();
-      final url = '${ApiConstants.baseUrl}${ApiConstants.runsEndpoint}';
+      final endpoint = ApiConstants.runsEndpoint;
 
-      print('🔍 Buscando territórios na URL: $url');
-      print('🔑 Headers: ${headers.keys.join(", ")}');
+      print('🔍 Buscando territórios na URL: ${ApiConstants.baseUrl}$endpoint');
 
-      final response = await http.get(Uri.parse(url), headers: headers);
+      final response = await _httpService.get(endpoint);
 
       print('📡 Resposta da API: Status ${response.statusCode}');
       print('📄 Body: ${response.body}');
@@ -187,11 +167,8 @@ class TerritoryService extends GetxService {
   /// Retorna lista de territórios da área
   Future<List<TerritoryModel>> getTerritoriesByArea(String areaName) async {
     try {
-      final headers = await _getHeaders();
-
-      final response = await http.get(
-        Uri.parse('${ApiConstants.baseUrl}/territories?area=$areaName'),
-        headers: headers,
+      final response = await _httpService.get(
+        '/territories?area=$areaName',
       );
 
       if (response.statusCode == 200) {
@@ -222,8 +199,9 @@ class TerritoryService extends GetxService {
     File? mapImageCleanPath,
   }) async {
     try {
-      final headers = await _getHeaders();
-      final url = '${ApiConstants.baseUrl}${ApiConstants.runsEndpoint}';
+      final headers = await _httpService.getHeaders();
+      final endpoint = ApiConstants.runsEndpoint;
+      final url = '${ApiConstants.baseUrl}$endpoint';
 
       print('📤 Enviando corrida (com território) para o servidor:');
       print('   - Start time: ${run.startTime}');
@@ -257,10 +235,7 @@ class TerritoryService extends GetxService {
         final request = http.MultipartRequest('POST', Uri.parse(url));
 
         // Adiciona headers de autenticação
-        final accessToken = _storage.getAccessToken();
-        if (accessToken != null) {
-          request.headers['Authorization'] = 'Bearer $accessToken';
-        }
+        request.headers.addAll(headers);
 
         // Adiciona os dados da corrida como JSON string no campo 'data'
         request.fields['data'] = jsonBody;
@@ -300,10 +275,9 @@ class TerritoryService extends GetxService {
         }
 
         print('   - Tamanho do JSON: ${jsonBody.length} bytes');
-        response = await http.post(
-          Uri.parse(url),
-          headers: headers,
-          body: jsonBody,
+        response = await _httpService.post(
+          endpoint,
+          requestBody,
         );
       }
 
@@ -381,8 +355,9 @@ class TerritoryService extends GetxService {
     File? mapImageCleanPath,
   }) async {
     try {
-      final headers = await _getHeaders();
-      final url = '${ApiConstants.baseUrl}${ApiConstants.simpleRunEndpoint}';
+      final headers = await _httpService.getHeaders();
+      final endpoint = ApiConstants.simpleRunEndpoint;
+      final url = '${ApiConstants.baseUrl}$endpoint';
 
       print('📤 Enviando corrida simples para o servidor:');
       print('   - Start time: ${run.startTime}');
@@ -415,11 +390,7 @@ class TerritoryService extends GetxService {
         // Prepara multipart request
         final request = http.MultipartRequest('POST', Uri.parse(url));
 
-        // Adiciona headers de autenticação
-        final accessToken = _storage.getAccessToken();
-        if (accessToken != null) {
-          request.headers['Authorization'] = 'Bearer $accessToken';
-        }
+        request.headers.addAll(headers);
 
         // Adiciona os dados da corrida como JSON string no campo 'data'
         request.fields['data'] = jsonBody;
@@ -459,10 +430,9 @@ class TerritoryService extends GetxService {
         }
 
         print('   - Tamanho do JSON: ${jsonBody.length} bytes');
-        response = await http.post(
-          Uri.parse(url),
-          headers: headers,
-          body: jsonBody,
+        response = await _httpService.post(
+          endpoint,
+          requestBody,
         );
       }
 

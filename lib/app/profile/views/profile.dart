@@ -19,68 +19,10 @@ class ProfilePage extends GetView<ProfileController> {
 
     return Scaffold(
       bottomNavigationBar: const BottomNavigationBarWidget(),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final error = controller.error.value;
-        if (error != null && error.isNotEmpty) {
-          return _ErrorState(message: error, onRetry: controller.refresh);
-        }
-
-        final user = controller.user.value;
-        if (user == null) {
-          return _ErrorState(
-            message: 'Perfil indisponível no momento.',
-            onRetry: controller.refresh,
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: controller.refresh,
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(child: _Header(context, user)),
-              SliverToBoxAdapter(child: const SizedBox(height: 12)),
-              SliverToBoxAdapter(
-                child: _StatsRow(
-                  user: user,
-                  runCount: controller.runs.length,
-                ),
-              ),
-              SliverToBoxAdapter(child: const SizedBox(height: 12)),
-              SliverToBoxAdapter(child: _BioCard(user: user)),
-              SliverToBoxAdapter(child: const SizedBox(height: 12)),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'Corridas',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(child: const SizedBox(height: 8)),
-              controller.runs.isEmpty
-                  ? const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.all(16),
-                        child: _EmptyRuns(),
-                      ),
-                    )
-                  : SliverList.separated(
-                      itemCount: controller.runs.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 10),
-                      itemBuilder: (_, i) =>
-                          _RunTile(run: controller.runs[i], resp: responsive),
-                    ),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
-            ],
-          ),
-        );
-      }),
+      body: _ProfileBody(
+        controller: controller,
+        responsive: responsive,
+      ),
     );
   }
 }
@@ -88,6 +30,97 @@ class ProfilePage extends GetView<ProfileController> {
 /// =======================
 /// WIDGETS
 /// =======================
+
+class _ProfileBody extends StatelessWidget {
+  final ProfileController controller;
+  final Responsive responsive;
+
+  const _ProfileBody({
+    required this.controller,
+    required this.responsive,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Obx(
+          () => controller.isLoading.value
+              ? const Center(child: CircularProgressIndicator())
+              : const SizedBox.shrink(),
+        ),
+        Obx(() {
+          final error = controller.error.value;
+          return (!controller.isLoading.value &&
+                  error != null &&
+                  error.isNotEmpty)
+              ? _ErrorState(message: error, onRetry: controller.refresh)
+              : const SizedBox.shrink();
+        }),
+        Obx(() {
+          if (controller.isLoading.value) return const SizedBox.shrink();
+          final error = controller.error.value;
+          if (error != null && error.isNotEmpty) {
+            return const SizedBox.shrink();
+          }
+          final user = controller.user.value;
+          if (user == null) {
+            return _ErrorState(
+              message: 'Perfil indisponível no momento.',
+              onRetry: controller.refresh,
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: controller.refresh,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(child: _Header(context, user)),
+                SliverToBoxAdapter(child: const SizedBox(height: 12)),
+                SliverToBoxAdapter(
+                  child: _StatsRow(
+                    user: user,
+                    runCount: controller.runs.length,
+                  ),
+                ),
+                SliverToBoxAdapter(child: const SizedBox(height: 12)),
+                SliverToBoxAdapter(child: _BioCard(user: user)),
+                SliverToBoxAdapter(child: const SizedBox(height: 12)),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'Corridas',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(child: const SizedBox(height: 8)),
+                controller.runs.isEmpty
+                    ? const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: _EmptyRuns(),
+                        ),
+                      )
+                    : SliverList.separated(
+                        itemCount: controller.runs.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        itemBuilder: (_, i) => _RunTile(
+                          run: controller.runs[i],
+                          resp: responsive,
+                        ),
+                      ),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
 
 Widget _Header(BuildContext context, UserModel user) {
   final theme = Theme.of(context);

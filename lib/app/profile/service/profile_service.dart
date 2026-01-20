@@ -1,22 +1,21 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'package:nur_app/app/profile/models/achievement_model.dart';
+import 'package:nur_app/app/achievement/local/models/achievement_model.dart';
 import 'package:nur_app/app/profile/models/user_stats_model.dart';
-import 'package:nur_app/app/profile/service/achievement_service.dart';
+import 'package:nur_app/app/achievement/local/service/achievement_service.dart';
 import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/core/services/storage_service.dart';
+import 'package:nur_app/core/services/http_service.dart';
 
 /// Serviço para gerenciar dados do perfil do usuário
 /// Busca estatísticas e conquistas da API
 class ProfileService extends GetxService {
-  late final StorageService _storage;
   late final AchievementService? _achievementService;
+  late final HttpService _httpService;
 
   @override
   void onInit() {
     super.onInit();
-    _storage = Get.find<StorageService>();
+    _httpService = Get.find<HttpService>();
     // Tenta obter AchievementService se estiver registrado
     if (Get.isRegistered<AchievementService>()) {
       _achievementService = Get.find<AchievementService>();
@@ -29,18 +28,7 @@ class ProfileService extends GetxService {
   Future<UserStatsModel> getUserStats() async {
     try {
       // TODO: Implementar chamada real à API quando estiver disponível
-      final accessToken = _storage.getAccessToken();
-      if (accessToken == null) {
-        throw Exception('Token de acesso não encontrado');
-      }
-      //
-      final response = await http.get(
-        Uri.parse('${ApiConstants.baseUrl}/users/profile/stats'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
+      final response = await _httpService.get('/users/profile/stats');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
@@ -67,6 +55,16 @@ class ProfileService extends GetxService {
         currentStreak: 0,
       );
     }
+  }
+
+  Future<Map<String, dynamic>> getCompleteProfile() async {
+    final response = await _httpService.get(
+      ApiConstants.profileCompleteEndpoint,
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Erro ao carregar perfil: ${response.statusCode}');
+    }
+    return json.decode(response.body) as Map<String, dynamic>;
   }
 
   /// Busca as conquistas do usuário

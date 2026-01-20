@@ -1,32 +1,19 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:nur_app/app/battles/models/battle_model.dart';
 import 'package:nur_app/app/battles/models/battle_result_model.dart';
 import 'package:nur_app/app/battles/models/battle_submit_model.dart';
 import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/core/services/storage_service.dart';
+import 'package:nur_app/core/services/http_service.dart';
 
 /// Serviço para gerenciar batalhas PVP
 class BattleService extends GetxService {
-  late final StorageService _storage;
+  late final HttpService _httpService;
 
   @override
   Future<void> onInit() async {
     super.onInit();
-    _storage = Get.find<StorageService>();
-  }
-
-  /// Obtém os headers com autenticação
-  Future<Map<String, String>> _getHeaders() async {
-    final headers = <String, String>{'Content-Type': 'application/json'};
-
-    final accessToken = _storage.getAccessToken();
-    if (accessToken != null) {
-      headers['Authorization'] = 'Bearer $accessToken';
-    }
-
-    return headers;
+    _httpService = Get.find<HttpService>();
   }
 
   /// Entra na fila de matchmaking
@@ -37,9 +24,6 @@ class BattleService extends GetxService {
     String? modeValue,
   }) async {
     try {
-      final headers = await _getHeaders();
-      final url = '${ApiConstants.baseUrl}${ApiConstants.battlesQueueEndpoint}';
-
       final body = <String, dynamic>{
         'mode': mode.name,
         if (modeValue != null) 'modeValue': modeValue,
@@ -49,10 +33,9 @@ class BattleService extends GetxService {
       print('   - Modo: ${mode.name}');
       if (modeValue != null) print('   - Valor: $modeValue');
 
-      final response = await http.post(
-        Uri.parse(url),
-        headers: headers,
-        body: json.encode(body),
+      final response = await _httpService.post(
+        ApiConstants.battlesQueueEndpoint,
+        body,
       );
 
       print('📡 Resposta da API: Status ${response.statusCode}');
@@ -85,19 +68,15 @@ class BattleService extends GetxService {
     BattleSubmitModel submitData,
   ) async {
     try {
-      final headers = await _getHeaders();
-      final url = '${ApiConstants.baseUrl}${ApiConstants.battlesSubmitEndpoint}';
-
       print('📤 Submetendo resultado da batalha...');
       print('   - Battle ID: ${submitData.battleId}');
       print('   - Distância: ${submitData.distance}m');
       print('   - Duração: ${submitData.duration}s');
       print('   - Pace: ${submitData.averagePace} min/km');
 
-      final response = await http.post(
-        Uri.parse(url),
-        headers: headers,
-        body: json.encode(submitData.toJson()),
+      final response = await _httpService.post(
+        ApiConstants.battlesSubmitEndpoint,
+        submitData.toJson(),
       );
 
       print('📡 Resposta da API: Status ${response.statusCode}');
@@ -130,15 +109,10 @@ class BattleService extends GetxService {
   /// [battleId] - ID da batalha a ser cancelada
   Future<void> cancelBattle(String battleId) async {
     try {
-      final headers = await _getHeaders();
-      final url =
-          '${ApiConstants.baseUrl}${ApiConstants.battlesCancelEndpoint}/$battleId';
-
       print('🚫 Cancelando batalha: $battleId');
 
-      final response = await http.delete(
-        Uri.parse(url),
-        headers: headers,
+      final response = await _httpService.delete(
+        '${ApiConstants.battlesCancelEndpoint}/$battleId',
       );
 
       print('📡 Resposta da API: Status ${response.statusCode}');
@@ -167,15 +141,10 @@ class BattleService extends GetxService {
     int offset = 0,
   }) async {
     try {
-      final headers = await _getHeaders();
-      final url =
-          '${ApiConstants.baseUrl}${ApiConstants.battlesHistoryEndpoint}?limit=$limit&offset=$offset';
-
       print('📜 Buscando histórico de batalhas...');
 
-      final response = await http.get(
-        Uri.parse(url),
-        headers: headers,
+      final response = await _httpService.get(
+        '${ApiConstants.battlesHistoryEndpoint}?limit=$limit&offset=$offset',
       );
 
       print('📡 Resposta da API: Status ${response.statusCode}');

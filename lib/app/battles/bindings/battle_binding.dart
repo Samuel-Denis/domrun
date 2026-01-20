@@ -9,7 +9,7 @@ class BattleBinding extends Bindings {
   void dependencies() {
     // Registra o BattleService se ainda não estiver registrado
     if (!Get.isRegistered<BattleService>()) {
-      Get.put<BattleService>(BattleService(), permanent: true);
+      Get.lazyPut<BattleService>(() => BattleService(), fenix: true);
     }
 
     // Registra o BattleController

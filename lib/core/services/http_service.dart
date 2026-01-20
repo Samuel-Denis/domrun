@@ -25,8 +25,9 @@ class HttpService extends GetxService {
 
   /// Obtém os headers padrão com autenticação
   /// Adiciona o access token se disponível
-  Future<Map<String, String>> _getHeaders({
+  Future<Map<String, String>> getHeaders({
     bool includeAuth = true,
+    Map<String, String>? extraHeaders,
   }) async {
     final headers = <String, String>{
       'Content-Type': 'application/json',
@@ -50,12 +51,16 @@ class HttpService extends GetxService {
       }
     }
 
+    if (extraHeaders != null) {
+      headers.addAll(extraHeaders);
+    }
+
     return headers;
   }
 
   /// Faz uma requisição GET autenticada
   Future<http.Response> get(String endpoint, {bool includeAuth = true}) async {
-    final headers = await _getHeaders(includeAuth: includeAuth);
+    final headers = await getHeaders(includeAuth: includeAuth);
     return await http.get(
       Uri.parse('${ApiConstants.baseUrl}$endpoint'),
       headers: headers,
@@ -68,7 +73,7 @@ class HttpService extends GetxService {
     Map<String, dynamic> body, {
     bool includeAuth = true,
   }) async {
-    final headers = await _getHeaders(includeAuth: includeAuth);
+    final headers = await getHeaders(includeAuth: includeAuth);
     return await http.post(
       Uri.parse('${ApiConstants.baseUrl}$endpoint'),
       headers: headers,
@@ -82,7 +87,7 @@ class HttpService extends GetxService {
     Map<String, dynamic> body, {
     bool includeAuth = true,
   }) async {
-    final headers = await _getHeaders(includeAuth: includeAuth);
+    final headers = await getHeaders(includeAuth: includeAuth);
     return await http.put(
       Uri.parse('${ApiConstants.baseUrl}$endpoint'),
       headers: headers,
@@ -92,10 +97,72 @@ class HttpService extends GetxService {
 
   /// Faz uma requisição DELETE autenticada
   Future<http.Response> delete(String endpoint, {bool includeAuth = true}) async {
-    final headers = await _getHeaders(includeAuth: includeAuth);
+    final headers = await getHeaders(includeAuth: includeAuth);
     return await http.delete(
       Uri.parse('${ApiConstants.baseUrl}$endpoint'),
       headers: headers,
     );
+  }
+
+  /// Faz uma requisição GET para uma URL absoluta
+  Future<http.Response> getUrl(
+    String url, {
+    bool includeAuth = true,
+    Map<String, String>? headers,
+  }) async {
+    final baseHeaders = await getHeaders(
+      includeAuth: includeAuth,
+      extraHeaders: headers,
+    );
+    return await http.get(Uri.parse(url), headers: baseHeaders);
+  }
+
+  /// Faz uma requisição POST para uma URL absoluta
+  Future<http.Response> postUrl(
+    String url,
+    Map<String, dynamic> body, {
+    bool includeAuth = true,
+    Map<String, String>? headers,
+  }) async {
+    final baseHeaders = await getHeaders(
+      includeAuth: includeAuth,
+      extraHeaders: headers,
+    );
+    return await http.post(
+      Uri.parse(url),
+      headers: baseHeaders,
+      body: json.encode(body),
+    );
+  }
+
+  /// Faz uma requisição PUT para uma URL absoluta
+  Future<http.Response> putUrl(
+    String url,
+    Map<String, dynamic> body, {
+    bool includeAuth = true,
+    Map<String, String>? headers,
+  }) async {
+    final baseHeaders = await getHeaders(
+      includeAuth: includeAuth,
+      extraHeaders: headers,
+    );
+    return await http.put(
+      Uri.parse(url),
+      headers: baseHeaders,
+      body: json.encode(body),
+    );
+  }
+
+  /// Faz uma requisição DELETE para uma URL absoluta
+  Future<http.Response> deleteUrl(
+    String url, {
+    bool includeAuth = true,
+    Map<String, String>? headers,
+  }) async {
+    final baseHeaders = await getHeaders(
+      includeAuth: includeAuth,
+      extraHeaders: headers,
+    );
+    return await http.delete(Uri.parse(url), headers: baseHeaders);
   }
 }

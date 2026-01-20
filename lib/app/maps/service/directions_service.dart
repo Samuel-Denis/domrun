@@ -1,11 +1,13 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mb;
 import 'package:nur_app/core/constants/api_constants.dart';
+import 'package:nur_app/core/services/http_service.dart';
 
 /// Serviço para usar a API Directions do Mapbox
 /// Faz road snapping - ajusta pontos GPS para seguir as ruas
 class DirectionsService {
+  final HttpService _httpService = Get.find<HttpService>();
   // Base URL da API Directions do Mapbox
   static const String _baseUrl = 'https://api.mapbox.com/directions/v5';
 
@@ -41,15 +43,16 @@ class DirectionsService {
           '&overview=full'
           '&alternatives=false';
       
-      final url = Uri.parse(urlString);
-
       print('🗺️  Buscando rota na API Directions do Mapbox...');
       print('   Profile: $fullProfile');
       print('   De: [${from.lng}, ${from.lat}]');
       print('   Para: [${to.lng}, ${to.lat}]');
       print('   URL: ${urlString.replaceAll(ApiConstants.mapboxAccessToken, 'TOKEN_HIDDEN')}');
 
-      final response = await http.get(url);
+      final response = await _httpService.getUrl(
+        urlString,
+        includeAuth: false,
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
@@ -128,11 +131,12 @@ class DirectionsService {
           '&overview=full'
           '&alternatives=false';
       
-      final url = Uri.parse(urlString);
-
       print('🗺️  Buscando rota com ${points.length} waypoints...');
 
-      final response = await http.get(url);
+      final response = await _httpService.getUrl(
+        urlString,
+        includeAuth: false,
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;

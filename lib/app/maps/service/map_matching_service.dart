@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'dart:math' as math;
-import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mb;
 import 'package:nur_app/core/constants/api_constants.dart';
+import 'package:nur_app/core/services/http_service.dart';
 
 /// Serviço para usar a API Map Matching do Mapbox
 /// O Map Matching é o "segredo do Strava": ajusta pontos GPS "sujos" para seguir exatamente as ruas
 /// Diferente da Directions API (que calcula rotas), o Map Matching corrige trajetos já percorridos
 class MapMatchingService {
+  final HttpService _httpService = Get.find<HttpService>();
   // Base URL da API Map Matching do Mapbox
   static const String _baseUrl = 'https://api.mapbox.com/matching/v5';
 
@@ -58,8 +60,6 @@ class MapMatchingService {
           '&overview=full'
           '&steps=false';
       
-      final url = Uri.parse(urlString);
-
       // Valida comprimento da URL (alguns servidores têm limite de ~2000 caracteres)
       if (urlString.length > 2000) {
         print('   ⚠️  AVISO: URL muito longa (${urlString.length} caracteres). Pode causar problemas.');
@@ -73,7 +73,10 @@ class MapMatchingService {
         print('   Primeiros 3 pontos: ${pointsToProcess.take(3).map((p) => '[${p.lng},${p.lat}]').join(', ')}');
       }
 
-      final response = await http.get(url);
+      final response = await _httpService.getUrl(
+        urlString,
+        includeAuth: false,
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
