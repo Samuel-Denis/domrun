@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
+import 'package:domrun/core/theme/app_colors.dart';
 
 /// Widget que desenha um fundo decorativo com padrão de mapa
 /// Simula linhas de estradas brilhantes em roxo/magenta sobre fundo escuro

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mb;
-import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/core/services/http_service.dart';
+import 'package:domrun/core/constants/api_constants.dart';
+import 'package:domrun/core/services/http_service.dart';
 
 /// Serviço para usar a API Directions do Mapbox
 /// Faz road snapping - ajusta pontos GPS para seguir as ruas

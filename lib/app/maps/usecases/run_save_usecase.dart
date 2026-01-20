@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mb;
-import 'package:nur_app/app/battles/controller/battle_controller.dart';
-import 'package:nur_app/app/maps/models/run_model.dart';
-import 'package:nur_app/app/maps/service/territory_service.dart';
+import 'package:domrun/app/battles/controller/battle_controller.dart';
+import 'package:domrun/app/maps/models/run_model.dart';
+import 'package:domrun/app/maps/service/territory_service.dart';
 
 enum RunSaveAction {
   battleHandled,

@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:nur_app/app/auth/controller/forgot_password_controller.dart';
-import 'package:nur_app/app/auth/service/auth_service.dart';
+import 'package:domrun/app/auth/controller/forgot_password_controller.dart';
+import 'package:domrun/app/auth/service/auth_service.dart';
 
 /// Binding para a tela de recuperação de senha
 /// Configura as dependências usando GetX

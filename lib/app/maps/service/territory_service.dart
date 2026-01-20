@@ -2,21 +2,19 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:nur_app/app/maps/models/territory_model.dart';
-import 'package:nur_app/app/maps/models/run_model.dart';
-import 'package:nur_app/app/maps/models/geojson_models.dart';
-import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/core/services/http_service.dart';
+import 'package:domrun/app/maps/models/territory_model.dart';
+import 'package:domrun/app/maps/models/run_model.dart';
+import 'package:domrun/app/maps/models/geojson_models.dart';
+import 'package:domrun/core/constants/api_constants.dart';
+import 'package:domrun/core/services/http_service.dart';
 
 /// Serviço para gerenciar territórios
 /// Envia territórios capturados para o servidor
-class TerritoryService extends GetxService {
+class TerritoryService {
   late final HttpService _httpService;
   bool _sendRunImages = false;
 
-  @override
-  Future<void> onInit() async {
-    super.onInit();
+  Future<void> init() async {
     _httpService = Get.find<HttpService>();
   }
 

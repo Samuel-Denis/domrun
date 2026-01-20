@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
-import 'package:nur_app/app/user/service/user_service.dart';
+import 'package:domrun/app/user/service/user_service.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:nur_app/app/maps/controller/controller.dart';
-import 'package:nur_app/app/navigation/widgets/bottom_navigation_bar.dart';
-import 'package:nur_app/app/navigation/controller/navigation_controller.dart';
-import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
-import 'package:nur_app/core/utils/responsive.dart';
-import 'package:nur_app/routes/app_routes.dart';
+import 'package:domrun/app/maps/controller/controller.dart';
+import 'package:domrun/app/navigation/widgets/bottom_navigation_bar.dart';
+import 'package:domrun/app/navigation/controller/navigation_controller.dart';
+import 'package:domrun/core/constants/api_constants.dart';
+import 'package:domrun/core/theme/app_colors.dart';
+import 'package:domrun/core/utils/responsive.dart';
+import 'package:domrun/routes/app_routes.dart';
 
 // Importação corrigida (caso precise descomentar no futuro)
-// import 'package:nur_app/app/navigation/controller/navigation_controller.dart';
+// import 'package:domrun/app/navigation/controller/navigation_controller.dart';
 
 /// Página completa do mapa com interface gamificada
 /// Exibe o mapa Mapbox com cabeçalho, estatísticas, missão diária e controles

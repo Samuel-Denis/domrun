@@ -1,4 +1,4 @@
-import 'package:nur_app/app/battles/models/battle_player_model.dart';
+import 'package:domrun/app/battles/models/battle_player_model.dart';
 
 /// Modelo de dados para uma batalha PVP
 class BattleModel {

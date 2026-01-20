@@ -1,4 +1,4 @@
-import 'package:nur_app/app/achievement/local/models/achievement_model.dart';
+import 'package:domrun/app/achievement/local/models/achievement_model.dart';
 
 /// Modelo de conquista do usuário (relacionamento)
 /// Representa a relação entre usuário e conquista

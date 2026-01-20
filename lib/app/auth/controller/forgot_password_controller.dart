@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/auth/service/auth_service.dart';
+import 'package:domrun/app/auth/service/auth_service.dart';
+import 'package:domrun/core/services/http_service.dart';
 
 /// Controller responsável por gerenciar o estado e lógica da tela de recuperação de senha
 /// Utiliza GetX para gerenciamento reativo de estado
@@ -91,10 +92,11 @@ class ForgotPasswordController extends GetxController {
         );
       }
     } catch (e) {
+      final message = e is ApiException ? e.message : e.toString();
       // Exibe mensagem de erro se o envio falhar
       Get.snackbar(
         'Erro',
-        'Erro ao enviar email: ${e.toString()}',
+        'Erro ao enviar email: $message',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         duration: const Duration(seconds: 3),

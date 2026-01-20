@@ -9,21 +9,21 @@ import 'package:geolocator/geolocator.dart'
     as geo; // Usamos prefixo para não confundir
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mb;
 import 'dart:async';
-import 'package:nur_app/app/maps/models/territory_model.dart';
-import 'package:nur_app/app/maps/models/run_model.dart';
-//import 'package:nur_app/app/maps/models/geojson_models.dart';
-import 'package:nur_app/app/maps/service/territory_service.dart';
-import 'package:nur_app/app/maps/service/directions_service.dart';
-import 'package:nur_app/app/maps/service/map_matching_service.dart';
-import 'package:nur_app/app/achievement/local/service/achievement_service.dart';
-import 'package:nur_app/app/profile/controller/profile_controller.dart';
-import 'package:nur_app/app/battles/controller/battle_controller.dart';
-import 'package:nur_app/app/user/service/user_service.dart';
-import 'package:nur_app/app/maps/usecases/run_save_usecase.dart';
-import 'package:nur_app/app/maps/usecases/run_stop_preparation_usecase.dart';
-import 'package:nur_app/core/services/http_service.dart';
-import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
+import 'package:domrun/app/maps/models/territory_model.dart';
+import 'package:domrun/app/maps/models/run_model.dart';
+//import 'package:domrun/app/maps/models/geojson_models.dart';
+import 'package:domrun/app/maps/service/territory_service.dart';
+import 'package:domrun/app/maps/service/directions_service.dart';
+import 'package:domrun/app/maps/service/map_matching_service.dart';
+import 'package:domrun/app/achievement/local/service/achievement_service.dart';
+import 'package:domrun/app/profile/controller/profile_controller.dart';
+import 'package:domrun/app/battles/controller/battle_controller.dart';
+import 'package:domrun/app/user/service/user_service.dart';
+import 'package:domrun/app/maps/usecases/run_save_usecase.dart';
+import 'package:domrun/app/maps/usecases/run_stop_preparation_usecase.dart';
+import 'package:domrun/core/services/http_service.dart';
+import 'package:domrun/core/constants/api_constants.dart';
+import 'package:domrun/core/theme/app_colors.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter/services.dart';
@@ -173,8 +173,12 @@ class MapController extends GetxController {
   /// Inicia o rastreamento básico de localização
   /// Aguarda os serviços estarem totalmente inicializados antes de usá-los
   @override
-  Future<void> onInit() async {
+  void onInit() {
     super.onInit();
+    _init();
+  }
+
+  Future<void> _init() async {
 
     // IMPORTANTE: Aguarda os serviços estarem registrados e inicializados
     // O TerritoryService foi criado com Get.put() no MapBinding
@@ -193,6 +197,7 @@ class MapController extends GetxController {
 
     if (Get.isRegistered<TerritoryService>()) {
       _territoryService = Get.find<TerritoryService>();
+      await _territoryService.init();
     } else {
       print('ERRO: TerritoryService não está registrado após tentativas');
     }

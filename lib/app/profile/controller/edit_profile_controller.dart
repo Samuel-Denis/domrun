@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:nur_app/app/auth/models/user_model.dart';
-import 'package:nur_app/app/auth/service/auth_service.dart';
-import 'package:nur_app/app/navigation/controller/navigation_controller.dart';
-import 'package:nur_app/app/user/service/user_service.dart';
-import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/core/services/storage_service.dart';
-import 'package:nur_app/routes/app_routes.dart';
+import 'package:domrun/app/auth/models/user_model.dart';
+import 'package:domrun/app/auth/service/auth_service.dart';
+import 'package:domrun/app/navigation/controller/navigation_controller.dart';
+import 'package:domrun/app/user/service/user_service.dart';
+import 'package:domrun/core/constants/api_constants.dart';
+import 'package:domrun/core/services/storage_service.dart';
+import 'package:domrun/routes/app_routes.dart';
 
 /// Controller para gerenciar a edição de perfil do usuário
 /// Controla os campos do formulário e a atualização dos dados

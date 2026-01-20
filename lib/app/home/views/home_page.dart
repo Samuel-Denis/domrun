@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/navigation/controller/navigation_controller.dart';
-import 'package:nur_app/app/navigation/widgets/bottom_navigation_bar.dart';
+import 'package:domrun/app/navigation/controller/navigation_controller.dart';
+import 'package:domrun/app/navigation/widgets/bottom_navigation_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

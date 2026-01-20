@@ -1,20 +1,22 @@
+import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/core/services/storage_service.dart';
+import 'package:domrun/core/constants/api_constants.dart';
+import 'package:domrun/core/services/storage_service.dart';
 
 /// Serviço HTTP com suporte a autenticação automática
 /// Adiciona o access token nas requisições e renova automaticamente se expirado
-class HttpService extends GetxService {
+class HttpService {
+  static const Duration _defaultTimeout = Duration(seconds: 20);
+
   // Serviço de storage para obter tokens
   late final StorageService _storage;
   // Serviço de autenticação para renovar tokens
   late final dynamic _authService;
 
-  @override
-  Future<void> onInit() async {
-    super.onInit();
+  Future<void> init() async {
     _storage = Get.find<StorageService>();
   }
 
@@ -29,9 +31,7 @@ class HttpService extends GetxService {
     bool includeAuth = true,
     Map<String, String>? extraHeaders,
   }) async {
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-    };
+    final headers = <String, String>{'Content-Type': 'application/json'};
 
     if (includeAuth) {
       // Verifica se o token está expirado e renova se necessário
@@ -40,7 +40,7 @@ class HttpService extends GetxService {
           await _authService?.refreshAccessToken();
         } catch (e) {
           // Se falhar ao renovar, continua sem token
-          print('Erro ao renovar token: $e');
+          _debug('Erro ao renovar token: $e');
         }
       }
 
@@ -61,9 +61,12 @@ class HttpService extends GetxService {
   /// Faz uma requisição GET autenticada
   Future<http.Response> get(String endpoint, {bool includeAuth = true}) async {
     final headers = await getHeaders(includeAuth: includeAuth);
-    return await http.get(
-      Uri.parse('${ApiConstants.baseUrl}$endpoint'),
-      headers: headers,
+    return _send(
+      () => http.get(
+        Uri.parse('${ApiConstants.baseUrl}$endpoint'),
+        headers: headers,
+      ),
+      endpoint: endpoint,
     );
   }
 
@@ -74,10 +77,13 @@ class HttpService extends GetxService {
     bool includeAuth = true,
   }) async {
     final headers = await getHeaders(includeAuth: includeAuth);
-    return await http.post(
-      Uri.parse('${ApiConstants.baseUrl}$endpoint'),
-      headers: headers,
-      body: json.encode(body),
+    return _send(
+      () => http.post(
+        Uri.parse('${ApiConstants.baseUrl}$endpoint'),
+        headers: headers,
+        body: json.encode(body),
+      ),
+      endpoint: endpoint,
     );
   }
 
@@ -88,19 +94,28 @@ class HttpService extends GetxService {
     bool includeAuth = true,
   }) async {
     final headers = await getHeaders(includeAuth: includeAuth);
-    return await http.put(
-      Uri.parse('${ApiConstants.baseUrl}$endpoint'),
-      headers: headers,
-      body: json.encode(body),
+    return _send(
+      () => http.put(
+        Uri.parse('${ApiConstants.baseUrl}$endpoint'),
+        headers: headers,
+        body: json.encode(body),
+      ),
+      endpoint: endpoint,
     );
   }
 
   /// Faz uma requisição DELETE autenticada
-  Future<http.Response> delete(String endpoint, {bool includeAuth = true}) async {
+  Future<http.Response> delete(
+    String endpoint, {
+    bool includeAuth = true,
+  }) async {
     final headers = await getHeaders(includeAuth: includeAuth);
-    return await http.delete(
-      Uri.parse('${ApiConstants.baseUrl}$endpoint'),
-      headers: headers,
+    return _send(
+      () => http.delete(
+        Uri.parse('${ApiConstants.baseUrl}$endpoint'),
+        headers: headers,
+      ),
+      endpoint: endpoint,
     );
   }
 
@@ -114,7 +129,10 @@ class HttpService extends GetxService {
       includeAuth: includeAuth,
       extraHeaders: headers,
     );
-    return await http.get(Uri.parse(url), headers: baseHeaders);
+    return _send(
+      () => http.get(Uri.parse(url), headers: baseHeaders),
+      endpoint: url,
+    );
   }
 
   /// Faz uma requisição POST para uma URL absoluta
@@ -128,10 +146,13 @@ class HttpService extends GetxService {
       includeAuth: includeAuth,
       extraHeaders: headers,
     );
-    return await http.post(
-      Uri.parse(url),
-      headers: baseHeaders,
-      body: json.encode(body),
+    return _send(
+      () => http.post(
+        Uri.parse(url),
+        headers: baseHeaders,
+        body: json.encode(body),
+      ),
+      endpoint: url,
     );
   }
 
@@ -146,10 +167,13 @@ class HttpService extends GetxService {
       includeAuth: includeAuth,
       extraHeaders: headers,
     );
-    return await http.put(
-      Uri.parse(url),
-      headers: baseHeaders,
-      body: json.encode(body),
+    return _send(
+      () => http.put(
+        Uri.parse(url),
+        headers: baseHeaders,
+        body: json.encode(body),
+      ),
+      endpoint: url,
     );
   }
 
@@ -163,6 +187,96 @@ class HttpService extends GetxService {
       includeAuth: includeAuth,
       extraHeaders: headers,
     );
-    return await http.delete(Uri.parse(url), headers: baseHeaders);
+    return _send(
+      () => http.delete(Uri.parse(url), headers: baseHeaders),
+      endpoint: url,
+    );
+  }
+
+  Future<http.Response> _send(
+    Future<http.Response> Function() request, {
+    required String endpoint,
+  }) async {
+    try {
+      final response = await request().timeout(_defaultTimeout);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw ApiException.fromResponse(response, endpoint: endpoint);
+      }
+      return response;
+    } on TimeoutException catch (_) {
+      throw ApiException.timeout(endpoint: endpoint);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException.network(endpoint: endpoint, message: e.toString());
+    }
+  }
+
+  void _debug(String message) {
+    if (kDebugMode) {
+      debugPrint(message);
+    }
+  }
+}
+
+class ApiException implements Exception {
+  final int? statusCode;
+  final String message;
+  final String? endpoint;
+  final dynamic body;
+
+  const ApiException({
+    required this.message,
+    this.statusCode,
+    this.endpoint,
+    this.body,
+  });
+
+  factory ApiException.fromResponse(
+    http.Response response, {
+    required String endpoint,
+  }) {
+    final parsed = _parseErrorMessage(response.body);
+    return ApiException(
+      statusCode: response.statusCode,
+      message: parsed ?? 'Erro na requisição (${response.statusCode})',
+      endpoint: endpoint,
+      body: response.body,
+    );
+  }
+
+  factory ApiException.timeout({required String endpoint}) {
+    return ApiException(message: 'Tempo limite excedido', endpoint: endpoint);
+  }
+
+  factory ApiException.network({
+    required String endpoint,
+    required String message,
+  }) {
+    return ApiException(message: message, endpoint: endpoint);
+  }
+
+  static String? _parseErrorMessage(String body) {
+    try {
+      final decoded = json.decode(body);
+      if (decoded is Map) {
+        final message =
+            decoded['message'] ?? decoded['error'] ?? decoded['detail'];
+        if (message is String && message.trim().isNotEmpty) {
+          return message;
+        }
+      }
+    } catch (_) {
+      // ignora parse inválido
+    }
+    if (body.trim().isNotEmpty) {
+      return body.trim();
+    }
+    return null;
+  }
+
+  @override
+  String toString() {
+    return 'ApiException(statusCode: $statusCode, message: $message, endpoint: $endpoint)';
   }
 }

@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:nur_app/app/ranking/models/trophy_ranking_entry.dart';
-import 'package:nur_app/app/ranking/service/ranking_service.dart';
+import 'package:domrun/app/ranking/models/trophy_ranking_entry.dart';
+import 'package:domrun/app/ranking/service/ranking_service.dart';
 
 class RankingController extends GetxController {
   final RankingService _service;

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/profile/controller/public_profile_controller.dart';
-import 'package:nur_app/app/achievement/local/data/achievements_data.dart';
-import 'package:nur_app/app/achievement/local/models/achievement_definition.dart';
-import 'package:nur_app/app/achievement/local/models/achievement_model.dart';
-import 'package:nur_app/app/profile/models/public_user_profile.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
-import 'package:nur_app/core/utils/responsive.dart';
+import 'package:domrun/app/profile/controller/public_profile_controller.dart';
+import 'package:domrun/app/achievement/local/data/achievements_data.dart';
+import 'package:domrun/app/achievement/local/models/achievement_definition.dart';
+import 'package:domrun/app/achievement/local/models/achievement_model.dart';
+import 'package:domrun/app/profile/models/public_user_profile.dart';
+import 'package:domrun/core/theme/app_colors.dart';
+import 'package:domrun/core/utils/responsive.dart';
 
 /// Tela de perfil público (visualização via ranking)
 class PublicProfilePage extends StatefulWidget {

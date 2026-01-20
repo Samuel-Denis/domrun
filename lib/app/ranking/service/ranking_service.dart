@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:nur_app/app/ranking/models/trophy_ranking_entry.dart';
-import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/core/services/http_service.dart';
+import 'package:domrun/app/ranking/models/trophy_ranking_entry.dart';
+import 'package:domrun/core/constants/api_constants.dart';
+import 'package:domrun/core/services/http_service.dart';
 
 /// Serviço para buscar ranking por troféus (rota pública)
 class RankingService {

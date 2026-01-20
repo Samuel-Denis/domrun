@@ -1,5 +1,5 @@
-import 'package:nur_app/app/auth/models/legue_model.dart';
-import 'package:nur_app/core/constants/api_constants.dart';
+import 'package:domrun/app/auth/models/legue_model.dart';
+import 'package:domrun/core/constants/api_constants.dart';
 
 class TrophyRankingEntry {
   final int position;

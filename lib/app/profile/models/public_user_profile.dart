@@ -1,5 +1,5 @@
-import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/app/maps/models/run_model.dart';
+import 'package:domrun/core/constants/api_constants.dart';
+import 'package:domrun/app/maps/models/run_model.dart';
 
 class PublicTerritory {
   final String id;

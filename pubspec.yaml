@@ -1,4 +1,4 @@
-name: nur_app
+name: domrun
 description: "Domrun - Jogo de conquista de territórios baseado em GPS."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.

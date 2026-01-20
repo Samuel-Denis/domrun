@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/auth/service/auth_service.dart';
-import 'package:nur_app/routes/app_routes.dart';
+import 'package:domrun/app/auth/service/auth_service.dart';
+import 'package:domrun/core/services/http_service.dart';
+import 'package:domrun/routes/app_routes.dart';
 
 /// Controller responsável por gerenciar o estado e lógica da tela de login
 /// Utiliza GetX para gerenciamento reativo de estado
@@ -114,10 +115,11 @@ class LoginController extends GetxController {
       // offAllNamed remove todas as rotas anteriores da pilha
       Get.offAllNamed(AppRoutes.map);
     } catch (e) {
+      final message = e is ApiException ? e.message : e.toString();
       // Exibe mensagem de erro se o login falhar
       Get.snackbar(
         'Erro',
-        'Erro ao fazer login: ${e.toString()}',
+        'Erro ao fazer login: $message',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
@@ -149,10 +151,11 @@ class LoginController extends GetxController {
       // Navega para a tela do mapa após login bem-sucedido
       Get.offAllNamed(AppRoutes.map);
     } catch (e) {
+      final message = e is ApiException ? e.message : e.toString();
       // Exibe mensagem de erro se o login falhar
       Get.snackbar(
         'Erro',
-        'Erro ao fazer login com Apple: ${e.toString()}',
+        'Erro ao fazer login com Apple: $message',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
@@ -183,10 +186,11 @@ class LoginController extends GetxController {
       // Navega para a tela do mapa após login bem-sucedido
       Get.offAllNamed(AppRoutes.map);
     } catch (e) {
+      final message = e is ApiException ? e.message : e.toString();
       // Exibe mensagem de erro se o login falhar
       Get.snackbar(
         'Erro',
-        'Erro ao fazer login com Google: ${e.toString()}',
+        'Erro ao fazer login com Google: $message',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         duration: const Duration(seconds: 3),

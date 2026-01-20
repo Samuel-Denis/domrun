@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/auth/service/auth_service.dart';
-import 'package:nur_app/routes/app_routes.dart';
+import 'package:domrun/app/auth/service/auth_service.dart';
+import 'package:domrun/core/services/http_service.dart';
+import 'package:domrun/routes/app_routes.dart';
 
 /// Controller responsável por gerenciar o estado e lógica da tela de cadastro
 /// Utiliza GetX para gerenciamento reativo de estado
@@ -245,10 +246,11 @@ class SignUpController extends GetxController {
       // Navega para a tela do mapa após cadastro bem-sucedido
       Get.offAllNamed(AppRoutes.login);
     } catch (e) {
+      final message = e is ApiException ? e.message : e.toString();
       // Exibe mensagem de erro se o cadastro falhar
       Get.snackbar(
         'Erro',
-        'Erro ao criar conta: ${e.toString()}',
+        'Erro ao criar conta: $message',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         duration: const Duration(seconds: 3),

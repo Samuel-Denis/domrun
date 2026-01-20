@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/achievement/local/data/achievements_data.dart';
-import 'package:nur_app/app/achievement/local/models/achievement_definition.dart';
-import 'package:nur_app/app/achievement/local/models/achievement_model.dart';
-import 'package:nur_app/app/user/service/user_service.dart';
-import 'package:nur_app/core/services/http_service.dart';
-import 'package:nur_app/core/services/storage_service.dart';
+import 'package:domrun/app/achievement/local/data/achievements_data.dart';
+import 'package:domrun/app/achievement/local/models/achievement_definition.dart';
+import 'package:domrun/app/achievement/local/models/achievement_model.dart';
+import 'package:domrun/app/user/service/user_service.dart';
+import 'package:domrun/core/services/http_service.dart';
+import 'package:domrun/core/services/storage_service.dart';
 
 /// Serviço para gerenciar conquistas localmente
 /// As conquistas são salvas localmente e apenas enviadas ao backend quando concluídas

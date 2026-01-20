@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/battles/controller/battle_controller.dart';
-import 'package:nur_app/app/battles/models/battle_model.dart';
-import 'package:nur_app/app/user/service/user_service.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
-import 'package:nur_app/core/utils/responsive.dart';
+import 'package:domrun/app/battles/controller/battle_controller.dart';
+import 'package:domrun/app/battles/models/battle_model.dart';
+import 'package:domrun/app/user/service/user_service.dart';
+import 'package:domrun/core/theme/app_colors.dart';
+import 'package:domrun/core/utils/responsive.dart';
 
 /// Página de batalhas PVP
 /// Permite entrar na fila de matchmaking, ver oponente e resultados

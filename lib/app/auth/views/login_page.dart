@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/auth/controller/login_controller.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
-import 'package:nur_app/core/utils/responsive.dart';
-import 'package:nur_app/core/widgets/map_image_background.dart';
+import 'package:domrun/app/auth/controller/login_controller.dart';
+import 'package:domrun/core/theme/app_colors.dart';
+import 'package:domrun/core/utils/responsive.dart';
+import 'package:domrun/core/widgets/map_image_background.dart';
 
 /// Tela de login do aplicativo
 /// Exibe campos de email/senha e opções de login social

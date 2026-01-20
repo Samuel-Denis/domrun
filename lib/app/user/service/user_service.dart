@@ -4,8 +4,8 @@ import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:nur_app/app/auth/models/user_model.dart';
-import 'package:nur_app/core/constants/api_constants.dart';
+import 'package:domrun/app/auth/models/user_model.dart';
+import 'package:domrun/core/constants/api_constants.dart';
 
 /// Serviço dedicado ao estado do usuário logado
 /// Responsável por buscar e armazenar o usuário em memória

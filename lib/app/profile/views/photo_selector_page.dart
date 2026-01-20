@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cropperx/cropperx.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:nur_app/app/profile/controller/photo_selector_controller.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
-import 'package:nur_app/core/utils/responsive.dart';
+import 'package:domrun/app/profile/controller/photo_selector_controller.dart';
+import 'package:domrun/core/theme/app_colors.dart';
+import 'package:domrun/core/utils/responsive.dart';
 
 /// Tela de seleção de fotos da galeria com crop integrado
 /// Permite escolher uma foto, fazer crop circular e retornar o arquivo

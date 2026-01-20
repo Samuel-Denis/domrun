@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/navigation/controller/navigation_controller.dart';
-import 'package:nur_app/app/navigation/widgets/bottom_navigation_bar.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
-import 'package:nur_app/core/utils/responsive.dart';
+import 'package:domrun/app/navigation/controller/navigation_controller.dart';
+import 'package:domrun/app/navigation/widgets/bottom_navigation_bar.dart';
+import 'package:domrun/core/theme/app_colors.dart';
+import 'package:domrun/core/utils/responsive.dart';
 
 /// Página de chat do aplicativo
 /// Exibe conversas e mensagens

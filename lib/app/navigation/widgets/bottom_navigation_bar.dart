@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/navigation/controller/navigation_controller.dart';
-import 'package:nur_app/app/maps/controller/controller.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
-import 'package:nur_app/core/utils/responsive.dart';
+import 'package:domrun/app/navigation/controller/navigation_controller.dart';
+import 'package:domrun/app/maps/controller/controller.dart';
+import 'package:domrun/core/theme/app_colors.dart';
+import 'package:domrun/core/utils/responsive.dart';
 
 /// Barra de navegação inferior customizada
 /// Estilo moderno com bordas arredondadas e ícones destacados

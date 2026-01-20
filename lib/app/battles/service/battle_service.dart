@@ -1,18 +1,16 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:nur_app/app/battles/models/battle_model.dart';
-import 'package:nur_app/app/battles/models/battle_result_model.dart';
-import 'package:nur_app/app/battles/models/battle_submit_model.dart';
-import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/core/services/http_service.dart';
+import 'package:domrun/app/battles/models/battle_model.dart';
+import 'package:domrun/app/battles/models/battle_result_model.dart';
+import 'package:domrun/app/battles/models/battle_submit_model.dart';
+import 'package:domrun/core/constants/api_constants.dart';
+import 'package:domrun/core/services/http_service.dart';
 
 /// Serviço para gerenciar batalhas PVP
-class BattleService extends GetxService {
+class BattleService {
   late final HttpService _httpService;
 
-  @override
-  Future<void> onInit() async {
-    super.onInit();
+  Future<void> init() async {
     _httpService = Get.find<HttpService>();
   }
 

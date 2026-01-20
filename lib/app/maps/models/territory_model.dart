@@ -1,4 +1,4 @@
-import 'package:nur_app/app/maps/models/run_model.dart';
+import 'package:domrun/app/maps/models/run_model.dart';
 
 /// Modelo de dados para um território capturado
 /// Representa uma área geográfica que pertence a um usuário

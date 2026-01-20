@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:get/get.dart';
-import 'package:nur_app/core/services/http_service.dart';
+import 'package:domrun/core/services/http_service.dart';
 
 /// Serviço para buscar imagens estáticas do Mapbox
 class MapboxStaticImageService extends GetxService {

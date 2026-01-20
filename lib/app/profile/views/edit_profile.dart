@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/auth/models/user_model.dart';
-import 'package:nur_app/app/profile/controller/edit_profile_controller.dart';
-import 'package:nur_app/app/user/service/user_service.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
-import 'package:nur_app/core/utils/responsive.dart';
+import 'package:domrun/app/auth/models/user_model.dart';
+import 'package:domrun/app/profile/controller/edit_profile_controller.dart';
+import 'package:domrun/app/user/service/user_service.dart';
+import 'package:domrun/core/theme/app_colors.dart';
+import 'package:domrun/core/utils/responsive.dart';
 
 class EditProfilePage extends GetView<EditProfileController> {
   const EditProfilePage({super.key});

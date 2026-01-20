@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
-import 'package:nur_app/app/maps/controller/controller.dart';
-import 'package:nur_app/app/maps/service/territory_service.dart';
-import 'package:nur_app/app/achievement/local/service/achievement_service.dart';
-import 'package:nur_app/app/maps/usecases/run_save_usecase.dart';
-import 'package:nur_app/app/maps/usecases/run_stop_preparation_usecase.dart';
+import 'package:domrun/app/maps/controller/controller.dart';
+import 'package:domrun/app/maps/service/territory_service.dart';
+import 'package:domrun/app/achievement/local/service/achievement_service.dart';
+import 'package:domrun/app/maps/usecases/run_save_usecase.dart';
+import 'package:domrun/app/maps/usecases/run_stop_preparation_usecase.dart';
 
 /// Binding para o módulo de mapas
 /// Configura as dependências do módulo usando GetX

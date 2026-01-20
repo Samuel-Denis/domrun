@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import 'package:nur_app/app/profile/models/public_user_profile.dart';
-import 'package:nur_app/app/profile/service/public_profile_service.dart';
-import 'package:nur_app/app/maps/service/geocoding_service.dart';
+import 'package:domrun/app/profile/models/public_user_profile.dart';
+import 'package:domrun/app/profile/service/public_profile_service.dart';
+import 'package:domrun/app/maps/service/geocoding_service.dart';
 
 /// Controller para perfil público de outro usuário
 class PublicProfileController extends GetxController {

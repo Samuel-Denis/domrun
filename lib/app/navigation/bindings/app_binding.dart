@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:nur_app/app/navigation/controller/navigation_controller.dart';
+import 'package:domrun/app/navigation/controller/navigation_controller.dart';
 
 /// Binding para o módulo de mapas
 /// Configura as dependências do módulo usando GetX

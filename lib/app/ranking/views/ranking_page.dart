@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/navigation/controller/navigation_controller.dart';
-import 'package:nur_app/app/navigation/widgets/bottom_navigation_bar.dart';
-import 'package:nur_app/app/ranking/controller/ranking_controller.dart';
-import 'package:nur_app/app/ranking/models/trophy_ranking_entry.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
+import 'package:domrun/app/navigation/controller/navigation_controller.dart';
+import 'package:domrun/app/navigation/widgets/bottom_navigation_bar.dart';
+import 'package:domrun/app/ranking/controller/ranking_controller.dart';
+import 'package:domrun/app/ranking/models/trophy_ranking_entry.dart';
+import 'package:domrun/core/theme/app_colors.dart';
 
 class RankingPage extends StatelessWidget {
   const RankingPage({super.key});

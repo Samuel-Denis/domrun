@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/auth/models/user_model.dart';
-import 'package:nur_app/app/auth/service/auth_service.dart';
-import 'package:nur_app/app/maps/models/run_model.dart';
-import 'package:nur_app/app/navigation/widgets/bottom_navigation_bar.dart';
-import 'package:nur_app/app/profile/controller/profile_controller.dart';
-import 'package:nur_app/app/profile/models/run_post_model.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
-import 'package:nur_app/core/utils/responsive.dart';
-import 'package:nur_app/routes/app_routes.dart';
+import 'package:domrun/app/auth/models/user_model.dart';
+import 'package:domrun/app/auth/service/auth_service.dart';
+import 'package:domrun/app/maps/models/run_model.dart';
+import 'package:domrun/app/navigation/widgets/bottom_navigation_bar.dart';
+import 'package:domrun/app/profile/controller/profile_controller.dart';
+import 'package:domrun/app/profile/models/run_post_model.dart';
+import 'package:domrun/core/theme/app_colors.dart';
+import 'package:domrun/core/utils/responsive.dart';
+import 'package:domrun/routes/app_routes.dart';
 
 class ProfilePage extends GetView<ProfileController> {
   const ProfilePage({super.key});

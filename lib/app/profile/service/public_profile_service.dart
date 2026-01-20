@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:nur_app/app/profile/models/public_user_profile.dart';
-import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/core/services/http_service.dart';
+import 'package:domrun/app/profile/models/public_user_profile.dart';
+import 'package:domrun/core/constants/api_constants.dart';
+import 'package:domrun/core/services/http_service.dart';
 
 /// Serviço para buscar perfil público de um usuário
 class PublicProfileService {

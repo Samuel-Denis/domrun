@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:nur_app/app/auth/controller/signup_controller.dart';
-import 'package:nur_app/app/auth/service/auth_service.dart';
+import 'package:domrun/app/auth/controller/signup_controller.dart';
+import 'package:domrun/app/auth/service/auth_service.dart';
 
 /// Binding para a tela de cadastro
 /// Configura as dependências usando GetX

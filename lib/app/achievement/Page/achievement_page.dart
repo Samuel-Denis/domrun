@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/achievement/controller/achievement_controller.dart';
-import 'package:nur_app/app/navigation/widgets/bottom_navigation_bar.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
-import 'package:nur_app/core/utils/responsive.dart';
-import 'package:nur_app/app/achievement/models/achievement_model.dart';
+import 'package:domrun/app/achievement/controller/achievement_controller.dart';
+import 'package:domrun/app/navigation/widgets/bottom_navigation_bar.dart';
+import 'package:domrun/core/theme/app_colors.dart';
+import 'package:domrun/core/utils/responsive.dart';
+import 'package:domrun/app/achievement/models/achievement_model.dart';
 
 class AchievementsPage extends GetView<AchievementsController> {
   const AchievementsPage({super.key});

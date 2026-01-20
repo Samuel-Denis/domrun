@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:nur_app/routes/app_routes.dart';
+import 'package:domrun/routes/app_routes.dart';
 
 /// Controller para gerenciar a navegação entre as páginas principais
 /// Controla qual página está ativa na barra de navegação inferior

@@ -1,10 +1,9 @@
-import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 /// Serviço de armazenamento local seguro
 /// Gerencia o armazenamento de tokens e dados do usuário
 /// Usa GetStorage para armazenamento persistente e seguro
-class StorageService extends GetxService {
+class StorageService {
   // Instância do GetStorage para armazenamento local
   GetStorage? _storage;
 
@@ -28,9 +27,7 @@ class StorageService extends GetxService {
 
   /// Inicializa o serviço de storage
   /// Deve ser chamado antes de usar o serviço
-  @override
-  Future<void> onInit() async {
-    super.onInit();
+  Future<void> init() async {
     // O GetStorage.init() já foi chamado no main.dart
     // Apenas obtém a instância do singleton
     _storage = GetStorage();

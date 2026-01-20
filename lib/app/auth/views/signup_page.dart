@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:nur_app/app/auth/controller/signup_controller.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
-import 'package:nur_app/core/utils/responsive.dart';
-import 'package:nur_app/core/widgets/map_image_background.dart';
+import 'package:domrun/app/auth/controller/signup_controller.dart';
+import 'package:domrun/core/theme/app_colors.dart';
+import 'package:domrun/core/utils/responsive.dart';
+import 'package:domrun/core/widgets/map_image_background.dart';
 
 /// Tela de cadastro do aplicativo
 /// Permite que novos usuários criem uma conta

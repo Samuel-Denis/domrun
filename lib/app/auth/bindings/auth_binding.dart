@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:nur_app/app/auth/controller/login_controller.dart';
-import 'package:nur_app/app/auth/service/auth_service.dart';
+import 'package:domrun/app/auth/controller/login_controller.dart';
+import 'package:domrun/app/auth/service/auth_service.dart';
 
 /// Binding para o módulo de autenticação
 /// Configura as dependências do módulo usando GetX

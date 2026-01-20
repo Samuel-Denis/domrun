@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import 'package:nur_app/app/achievement/models/achievement_model.dart';
-import 'package:nur_app/app/achievement/service/achievement_api_service.dart';
+import 'package:domrun/app/achievement/models/achievement_model.dart';
+import 'package:domrun/app/achievement/service/achievement_api_service.dart';
 
 class AchievementsController extends GetxController {
   late final AchievementApiService _apiService;

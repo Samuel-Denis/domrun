@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'package:get/get.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mb;
-import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/core/services/http_service.dart';
+import 'package:domrun/core/constants/api_constants.dart';
+import 'package:domrun/core/services/http_service.dart';
 
 /// Serviço para usar a API Map Matching do Mapbox
 /// O Map Matching é o "segredo do Strava": ajusta pontos GPS "sujos" para seguir exatamente as ruas

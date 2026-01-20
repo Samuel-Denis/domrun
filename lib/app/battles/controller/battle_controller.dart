@@ -1,20 +1,18 @@
 import 'dart:async';
 import 'package:get/get.dart';
-import 'package:nur_app/app/auth/service/auth_service.dart';
-import 'package:nur_app/app/battles/models/battle_model.dart';
-import 'package:nur_app/app/battles/models/battle_result_model.dart';
-import 'package:nur_app/app/battles/models/battle_submit_model.dart';
-import 'package:nur_app/app/battles/models/league_model.dart';
-import 'package:nur_app/app/battles/service/battle_service.dart';
-import 'package:nur_app/app/battles/utils/battle_score_calculator.dart';
-import 'package:nur_app/app/maps/models/run_model.dart';
-import 'package:nur_app/app/user/service/user_service.dart';
+import 'package:domrun/app/battles/models/battle_model.dart';
+import 'package:domrun/app/battles/models/battle_result_model.dart';
+import 'package:domrun/app/battles/models/battle_submit_model.dart';
+import 'package:domrun/app/battles/models/league_model.dart';
+import 'package:domrun/app/battles/service/battle_service.dart';
+import 'package:domrun/app/battles/utils/battle_score_calculator.dart';
+import 'package:domrun/app/maps/models/run_model.dart';
+import 'package:domrun/app/user/service/user_service.dart';
+import 'package:domrun/core/services/http_service.dart';
 
 /// Controller para gerenciar batalhas PVP
 class BattleController extends GetxController {
   late final BattleService _battleService;
-  late final AuthService _authService;
-
   late final UserService _userService;
 
   // Batalha atual
@@ -42,11 +40,15 @@ class BattleController extends GetxController {
   var timeRemaining = 0.obs;
 
   @override
-  Future<void> onInit() async {
+  void onInit() {
     super.onInit();
+    _init();
+  }
+
+  Future<void> _init() async {
     _battleService = Get.find<BattleService>();
-    _authService = Get.find<AuthService>();
     _userService = Get.find<UserService>();
+    await _battleService.init();
   }
 
   @override
@@ -88,11 +90,12 @@ class BattleController extends GetxController {
         // TODO: Implementar WebSocket para receber notificação quando encontrar oponente
       }
     } catch (e) {
+      final message = e is ApiException ? e.message : e.toString();
       print('❌ Erro ao entrar na fila: $e');
       isSearchingOpponent.value = false;
       Get.snackbar(
         'Erro',
-        'Não foi possível entrar na fila de matchmaking',
+        'Não foi possível entrar na fila: $message',
         backgroundColor: Get.theme.colorScheme.error,
       );
     }
@@ -226,10 +229,11 @@ class BattleController extends GetxController {
       // Recarrega histórico
       await loadBattleHistory();
     } catch (e) {
+      final message = e is ApiException ? e.message : e.toString();
       print('❌ Erro ao submeter resultado: $e');
       Get.snackbar(
         'Erro',
-        'Não foi possível submeter resultado da batalha',
+        'Não foi possível submeter resultado: $message',
         backgroundColor: Get.theme.colorScheme.error,
       );
     }

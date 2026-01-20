@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:nur_app/app/profile/controller/photo_selector_controller.dart';
+import 'package:domrun/app/profile/controller/photo_selector_controller.dart';
 
 /// Binding para o módulo de seleção de fotos
 /// Configura as dependências do módulo usando GetX

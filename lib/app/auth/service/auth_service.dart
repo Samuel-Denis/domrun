@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:nur_app/app/auth/models/user_model.dart';
-import 'package:nur_app/app/user/service/user_service.dart';
-import 'package:nur_app/core/constants/api_constants.dart';
-import 'package:nur_app/core/services/http_service.dart';
-import 'package:nur_app/core/services/storage_service.dart';
+import 'package:domrun/app/auth/models/user_model.dart';
+import 'package:domrun/app/user/service/user_service.dart';
+import 'package:domrun/core/constants/api_constants.dart';
+import 'package:domrun/core/services/http_service.dart';
+import 'package:domrun/core/services/storage_service.dart';
 
 /// Serviço de autenticação
 /// Gerencia todas as operações relacionadas à autenticação do usuário

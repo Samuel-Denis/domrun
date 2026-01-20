@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nur_app/core/theme/app_colors.dart';
+import 'package:domrun/core/theme/app_colors.dart';
 
 /// Widget que exibe uma imagem de mapa como fundo
 /// Use este widget se você tiver uma imagem real do mapa
