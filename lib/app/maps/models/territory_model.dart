@@ -8,7 +8,8 @@ class TerritoryModel {
   final String userName;
   final String userColor; // Cor do usuário (hexadecimal)
   final String areaName; // Nome da área (ex: "Parque Ibirapuera - Sul")
-  final List<PositionPoint> boundary; // Pontos que formam o perímetro do território
+  final List<PositionPoint>
+  boundary; // Pontos que formam o perímetro do território
   final DateTime capturedAt; // Data/hora em que foi capturado
   final double area; // Área em metros quadrados (opcional)
   final double? distance; // Distância em metros
@@ -60,15 +61,23 @@ class TerritoryModel {
 
   /// Cria o modelo a partir de JSON retornado pela API
   factory TerritoryModel.fromJson(Map<String, dynamic> json) {
+    final geo = json['geometryGeoJson'] as Map<String, dynamic>?;
+    final coords = (geo?['coordinates'] as List?) ?? const [];
+
+    // Polygon → ring exterior
+    final outerRing = coords.isNotEmpty ? (coords[0] as List) : const [];
+
+    final boundary = outerRing
+        .map((p) => PositionPoint.fromGeoJson(p as List))
+        .toList();
+
     return TerritoryModel(
       id: json['id'] as String,
       userId: json['userId'] as String,
       userName: json['userName'] as String,
       userColor: json['userColor'] as String,
       areaName: json['areaName'] as String,
-      boundary: (json['boundary'] as List)
-          .map((p) => PositionPoint.fromJson(p as Map<String, dynamic>))
-          .toList(),
+      boundary: boundary,
       capturedAt: DateTime.parse(json['capturedAt'] as String),
       area: (json['area'] as num?)?.toDouble() ?? 0.0,
       distance: (json['distance'] as num?)?.toDouble(),

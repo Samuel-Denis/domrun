@@ -1,14 +1,14 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
-import 'package:domrun/app/user/service/user_service.dart';
 import 'package:domrun/core/bindings/initial_binding.dart';
 import 'package:domrun/core/constants/api_constants.dart';
 import 'package:domrun/core/constants/app_constants.dart';
 import 'package:domrun/core/theme/app_theme.dart';
+import 'package:domrun/app/splash/views/splash_page.dart';
 import 'package:domrun/routes/app_pages.dart';
-import 'package:domrun/routes/app_routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +19,22 @@ void main() async {
   // Configura o token do Mapbox usando constantes
   MapboxOptions.setAccessToken(ApiConstants.mapboxAccessToken);
 
-  runApp(const MyApp());
+  runZonedGuarded(
+    () => runApp(const MyApp()),
+    (error, stackTrace) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+        ),
+      );
+    },
+    zoneSpecification: ZoneSpecification(
+      print: (self, parent, zone, line) {
+        // Silencia prints em todo o app.
+      },
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -27,12 +42,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Verifica se o usuário está autenticado para definir a rota inicial
-    final userService = Get.find<UserService>();
-    final initialRoute = userService.hasUser
-        ? AppRoutes.map
-        : AppRoutes.login;
-
     return GetMaterialApp(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
@@ -40,9 +49,8 @@ class MyApp extends StatelessWidget {
       defaultTransition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 200),
       initialBinding: InitialBinding(),
+      home: const SplashPage(),
       // Configuração de rotas usando GetX
-      initialRoute:
-          initialRoute, // Inicia no mapa se autenticado, senão no login
       getPages: AppPages.pages,
     );
   }

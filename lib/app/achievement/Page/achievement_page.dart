@@ -16,7 +16,7 @@ class AchievementsPage extends GetView<AchievementsController> {
     return Container(
       decoration: BoxDecoration(color: AppColors.surface),
       child: Scaffold(
-        bottomNavigationBar: const BottomNavigationBarWidget(),
+        bottomNavigationBar: BottomNavigationBarWidget(),
         backgroundColor: Colors.transparent,
         appBar: _buildAppBar(responsive),
         body: Column(

@@ -18,11 +18,8 @@ class ProfilePage extends GetView<ProfileController> {
     final responsive = Responsive(context);
 
     return Scaffold(
-      bottomNavigationBar: const BottomNavigationBarWidget(),
-      body: _ProfileBody(
-        controller: controller,
-        responsive: responsive,
-      ),
+      bottomNavigationBar: BottomNavigationBarWidget(),
+      body: _ProfileBody(controller: controller, responsive: responsive),
     );
   }
 }
@@ -35,10 +32,7 @@ class _ProfileBody extends StatelessWidget {
   final ProfileController controller;
   final Responsive responsive;
 
-  const _ProfileBody({
-    required this.controller,
-    required this.responsive,
-  });
+  const _ProfileBody({required this.controller, required this.responsive});
 
   @override
   Widget build(BuildContext context) {
@@ -107,10 +101,8 @@ class _ProfileBody extends StatelessWidget {
                     : SliverList.separated(
                         itemCount: controller.runs.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 10),
-                        itemBuilder: (_, i) => _RunTile(
-                          run: controller.runs[i],
-                          resp: responsive,
-                        ),
+                        itemBuilder: (_, i) =>
+                            _RunTile(run: controller.runs[i], resp: responsive),
                       ),
                 const SliverToBoxAdapter(child: SizedBox(height: 24)),
               ],
@@ -884,20 +876,19 @@ void _showRunImageDialog(BuildContext context, RunPostModel run) {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Fechar'),
-          ),
+          TextButton(onPressed: () => Get.back(), child: const Text('Fechar')),
           if (imageBytes == null && !isLoading)
             TextButton(
-              onPressed:
-                  run.path.isEmpty ? null : () => controller.generateRunImage(run),
+              onPressed: run.path.isEmpty
+                  ? null
+                  : () => controller.generateRunImage(run),
               child: const Text('Gerar novamente'),
             ),
           if (imageBytes != null)
             TextButton(
-              onPressed:
-                  isLoading ? null : () => controller.saveRunImageAndNotify(),
+              onPressed: isLoading
+                  ? null
+                  : () => controller.saveRunImageAndNotify(),
               child: const Text('Salvar na galeria'),
             ),
         ],

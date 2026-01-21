@@ -101,31 +101,46 @@ class RunModel {
 class PositionPoint {
   final double latitude;
   final double longitude;
-  final DateTime timestamp;
+  final DateTime? timestamp;
 
-  PositionPoint({
+  const PositionPoint({
     required this.latitude,
     required this.longitude,
-    required this.timestamp,
+    this.timestamp,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'latitude': latitude,
-      'longitude': longitude,
-      // IMPORTANTE: O timestamp preserva a ordem cronológica do caminho
-      // O backend deve usar este timestamp para ordenar os pontos corretamente
-      'timestamp': timestamp.toIso8601String(),
-    };
-  }
-
+  /// Para JSON normal { latitude, longitude, timestamp }
   factory PositionPoint.fromJson(Map<String, dynamic> json) {
     return PositionPoint(
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
-      timestamp: DateTime.parse(json['timestamp'] as String),
+      timestamp: json['timestamp'] != null
+          ? DateTime.parse(json['timestamp'] as String)
+          : null,
     );
   }
+
+  /// Para GeoJSON: [lon, lat]
+  factory PositionPoint.fromGeoJson(List<dynamic> pair) {
+    if (pair.length < 2) {
+      throw FormatException('GeoJSON inválido: $pair');
+    }
+
+    final lon = (pair[0] as num).toDouble();
+    final lat = (pair[1] as num).toDouble();
+
+    return PositionPoint(
+      latitude: lat,
+      longitude: lon,
+      timestamp: null, // GeoJSON não tem tempo
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'latitude': latitude,
+    'longitude': longitude,
+    if (timestamp != null) 'timestamp': timestamp!.toIso8601String(),
+  };
 }
 
 List<PositionPoint> _parsePath(dynamic raw) {

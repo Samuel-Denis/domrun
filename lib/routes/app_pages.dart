@@ -1,3 +1,4 @@
+import 'package:domrun/app/navigation/middleware/nav_sync_middleware.dart';
 import 'package:get/get.dart';
 import 'package:domrun/app/achievement/Page/achievement_page.dart';
 import 'package:domrun/app/achievement/bindings/achievement_binding.dart';
@@ -45,6 +46,7 @@ class AppPages {
       name: AppRoutes.profile,
       page: () => const ProfilePage(),
       binding: ProfileBinding(),
+      middlewares: [NavSyncMiddleware()],
     ),
     GetPage(
       name: AppRoutes.editNewProfile,
@@ -65,12 +67,14 @@ class AppPages {
       name: AppRoutes.map,
       page: () => const MapPage(),
       binding: MapBinding(), // Injeta as dependências do módulo
+      middlewares: [NavSyncMiddleware()],
     ),
     // Rota de Ranking
     GetPage(
       name: AppRoutes.ranking,
       page: () => const RankingPage(),
       binding: RankingBinding(),
+      middlewares: [NavSyncMiddleware()],
     ),
     // Rota de Search
     GetPage(name: AppRoutes.search, page: () => const SearchPage()),
@@ -106,6 +110,7 @@ class AppPages {
       name: AppRoutes.achievements,
       page: () => const AchievementsPage(),
       binding: AchievementBinding(),
+      middlewares: [NavSyncMiddleware()],
     ),
   ];
 }

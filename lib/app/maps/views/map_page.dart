@@ -5,7 +5,6 @@ import 'package:domrun/app/user/service/user_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:domrun/app/maps/controller/controller.dart';
 import 'package:domrun/app/navigation/widgets/bottom_navigation_bar.dart';
-import 'package:domrun/app/navigation/controller/navigation_controller.dart';
 import 'package:domrun/core/constants/api_constants.dart';
 import 'package:domrun/core/theme/app_colors.dart';
 import 'package:domrun/core/utils/responsive.dart';
@@ -27,16 +26,6 @@ class MapPage extends StatelessWidget {
     final MapController controller = Get.find<MapController>();
     final UserService userService = Get.find<UserService>();
     // final AuthService authService = Get.find<AuthService>();
-
-    // Atualiza o índice da navegação para Mapa (1)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final navController = Get.find<NavigationController>();
-      if (navController.currentIndex.value != 1) {
-        navController.currentIndex.value = 1;
-      }
-      // Evita excluir o LoginController aqui para não
-      // destruir TextEditingControllers ainda referenciados.
-    });
 
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A), // Fundo escuro

@@ -179,7 +179,6 @@ class MapController extends GetxController {
   }
 
   Future<void> _init() async {
-
     // IMPORTANTE: Aguarda os serviços estarem registrados e inicializados
     // O TerritoryService foi criado com Get.put() no MapBinding
     // O UserService foi criado com Get.put() no main.dart
@@ -2586,7 +2585,7 @@ class MapController extends GetxController {
     for (int i = 1; i < points.length; i++) {
       final p1 = points[i - 1];
       final p2 = points[i];
-      final seconds = p2.timestamp.difference(p1.timestamp).inSeconds;
+      final seconds = p2.timestamp?.difference(p1.timestamp!).inSeconds ?? 0;
       if (seconds <= 0) continue;
       final meters = _calculateDistanceBetweenPoints(p1, p2);
       final speedKmh = (meters / seconds) * 3.6;

@@ -24,7 +24,7 @@ class RankingPage extends StatelessWidget {
     });
 
     return Scaffold(
-      bottomNavigationBar: const BottomNavigationBarWidget(),
+      bottomNavigationBar: BottomNavigationBarWidget(),
       backgroundColor: AppColors.surfaceDark,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -74,8 +74,9 @@ class _RankingBody extends StatelessWidget {
           final TrophyRankingEntry? second = users.length > 1 ? users[1] : null;
           final TrophyRankingEntry? third = users.length > 2 ? users[2] : null;
 
-          final List<TrophyRankingEntry> rest =
-              users.length > 3 ? users.sublist(3) : const [];
+          final List<TrophyRankingEntry> rest = users.length > 3
+              ? users.sublist(3)
+              : const [];
 
           return RefreshIndicator(
             onRefresh: () => controller.load(),

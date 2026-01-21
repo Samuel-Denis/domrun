@@ -1,39 +1,47 @@
-import 'package:get/get.dart';
-import 'package:domrun/app/auth/service/auth_service.dart';
 import 'package:domrun/app/navigation/controller/navigation_controller.dart';
-import 'package:domrun/app/user/service/user_service.dart';
-import 'package:domrun/core/services/http_service.dart';
+import 'package:get/get.dart';
 import 'package:domrun/core/services/storage_service.dart';
+import 'package:domrun/core/services/http_service.dart';
+import 'package:domrun/app/user/service/user_service.dart';
+import 'package:domrun/app/auth/service/auth_service.dart';
 
-/// Binding inicial para dependências globais
 class InitialBinding extends Bindings {
   @override
   void dependencies() {
-    Get.putAsync<StorageService>(() async {
-      final service = StorageService();
-      await service.init();
-      return service;
-    }, permanent: true);
-
-    Get.putAsync<HttpService>(() async {
-      final service = HttpService();
-      await service.init();
-      return service;
-    }, permanent: true);
-
-    Get.put<UserService>(UserService(), permanent: true);
-
-    Get.putAsync<AuthService>(() async {
-      final service = AuthService();
-      final httpService = Get.find<HttpService>();
-      httpService.setAuthService(service);
-      await service.checkAuthStatus();
-      return service;
-    }, permanent: true);
+    Get.put<AppBootstrapper>(AppBootstrapper(), permanent: true);
 
     Get.lazyPut<NavigationController>(
       () => NavigationController(),
       fenix: true,
     );
+  }
+}
+
+class AppBootstrapper {
+  Future<void>? _initFuture;
+
+  Future<void> init() {
+    return _initFuture ??= _doInit();
+  }
+
+  Future<void> _doInit() async {
+    // 1) Storage
+    final storage = StorageService();
+    await storage.init();
+    Get.put<StorageService>(storage, permanent: true);
+
+    // 2) Http
+    final http = HttpService();
+    await http.init();
+    Get.put<HttpService>(http, permanent: true);
+
+    // 3) UserService
+    final userService = UserService();
+    Get.put<UserService>(userService, permanent: true);
+
+    // 4) AuthService (SYNC registration após deps prontas)
+    final authService = AuthService();
+    http.setAuthService(authService);
+    Get.put<AuthService>(authService, permanent: true);
   }
 }

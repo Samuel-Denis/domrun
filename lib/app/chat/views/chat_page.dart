@@ -45,7 +45,6 @@ class ChatPage extends StatelessWidget {
         ),
       ),
       // Barra de navegação inferior fixa usando Scaffold
-      bottomNavigationBar: const BottomNavigationBarWidget(),
     );
   }
 }

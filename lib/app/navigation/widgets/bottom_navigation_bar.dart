@@ -2,28 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:domrun/app/navigation/controller/navigation_controller.dart';
-import 'package:domrun/app/maps/controller/controller.dart';
 import 'package:domrun/core/theme/app_colors.dart';
 import 'package:domrun/core/utils/responsive.dart';
 
 /// Barra de navegação inferior customizada
 /// Estilo moderno com bordas arredondadas e ícones destacados
 /// Permite navegar entre as páginas principais do aplicativo
-class BottomNavigationBarWidget extends StatelessWidget {
+
+class BottomNavigationBarWidget extends GetView<NavigationController> {
   const BottomNavigationBarWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final navigationController = Get.find<NavigationController>();
-    final mapController = Get.isRegistered<MapController>()
-        ? Get.find<MapController>()
-        : null;
 
     return Obx(() {
-      final isDisabled =
-          (mapController?.isRunSummaryLoading.value ?? false) ||
-          (mapController?.isRunSummaryVisible.value ?? false);
       return Container(
         margin: EdgeInsets.only(
           left: responsive.width * 0.02,
@@ -41,38 +34,27 @@ class BottomNavigationBarWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             _buildNavButton(
-              context: context,
               svgPath: 'assets/images/icon_home.svg',
-              index: 0,
-              controller: navigationController,
+              itemIndex: 0,
+              controller: controller,
               responsive: responsive,
             ),
             _buildNavButton(
-              context: context,
               svgPath: 'assets/images/icon_map.svg',
-              index: 1,
-              controller: navigationController,
+              itemIndex: 1,
+              controller: controller,
               responsive: responsive,
             ),
             _buildNavButton(
-              context: context,
               svgPath: 'assets/images/icon_ranking.svg',
-              index: 2,
-              controller: navigationController,
+              itemIndex: 2,
+              controller: controller,
               responsive: responsive,
             ),
-            /*   _buildNavButton(
-              context: context,
-              svgPath: 'assets/images/icon_search.svg',
-              index: 3,
-              controller: navigationController,
-              responsive: responsive,
-            ), */
             _buildNavButton(
-              context: context,
               svgPath: 'assets/images/icon_person.svg',
-              index: 3,
-              controller: navigationController,
+              itemIndex: 3,
+              controller: controller,
               responsive: responsive,
             ),
           ],
@@ -81,27 +63,22 @@ class BottomNavigationBarWidget extends StatelessWidget {
     });
   }
 
-  /// Constrói um botão de navegação
   Widget _buildNavButton({
-    required BuildContext context,
     required String svgPath,
-    required int index,
+    required int itemIndex,
     required NavigationController controller,
     required Responsive responsive,
   }) {
-    final isSelected = controller.currentIndex.value == index;
+    final isSelected = controller.currentIndex.value == itemIndex;
     final selectedColor = isSelected
         ? AppColors.white
-        : AppColors.white.withOpacity(0.6); // Cor quando não selecionado
+        : AppColors.white.withOpacity(0.6);
 
-    return Container(
-      color: Colors.transparent,
+    return SizedBox(
       width: responsive.width * 0.18,
       height: double.infinity,
       child: InkWell(
-        onTap: () {
-          controller.navigateToPage(index);
-        },
+        onTap: () => controller.navigateToPage(itemIndex),
         borderRadius: BorderRadius.circular(responsive.spacing(12)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -128,7 +105,6 @@ class BottomNavigationBarWidget extends StatelessWidget {
                 color: selectedColor,
               ),
             ),
-            //  Icon(icon, size: responsive.iconSize(30), color: selectedColor),
           ],
         ),
       ),
